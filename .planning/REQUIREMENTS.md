@@ -101,52 +101,52 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| JOIN-01 | — | Pending |
-| JOIN-02 | — | Pending |
-| JOIN-03 | — | Pending |
-| JOIN-04 | — | Pending |
-| JOIN-05 | — | Pending |
-| GAME-01 | — | Pending |
-| GAME-02 | — | Pending |
-| GAME-03 | — | Pending |
-| GAME-04 | — | Pending |
-| GAME-05 | — | Pending |
-| GAME-06 | — | Pending |
-| GAME-07 | — | Pending |
-| GAME-08 | — | Pending |
-| GAME-09 | — | Pending |
-| GAME-10 | — | Pending |
-| ADMIN-01 | — | Pending |
-| ADMIN-02 | — | Pending |
-| ADMIN-03 | — | Pending |
-| ADMIN-04 | — | Pending |
-| ADMIN-05 | — | Pending |
-| ADMIN-06 | — | Pending |
-| ADMIN-07 | — | Pending |
-| QUEST-01 | — | Pending |
-| QUEST-02 | — | Pending |
-| QUEST-03 | — | Pending |
-| QUEST-04 | — | Pending |
-| QUEST-05 | — | Pending |
-| QUEST-06 | — | Pending |
-| QUEST-07 | — | Pending |
-| AUDIO-01 | — | Pending |
-| AUDIO-02 | — | Pending |
-| AUDIO-03 | — | Pending |
-| AUDIO-04 | — | Pending |
-| AUDIO-05 | — | Pending |
-| AUDIO-06 | — | Pending |
-| STAT-01 | — | Pending |
-| DEPLOY-01 | — | Pending |
-| DEPLOY-02 | — | Pending |
-| DEPLOY-03 | — | Pending |
-| DEPLOY-04 | — | Pending |
+| JOIN-01 | Phase 3 | Pending |
+| JOIN-02 | Phase 2 | Pending |
+| JOIN-03 | Phase 3 | Pending |
+| JOIN-04 | Phase 3 | Pending |
+| JOIN-05 | Phase 2 | Pending |
+| GAME-01 | Phase 3 | Pending |
+| GAME-02 | Phase 2 | Pending |
+| GAME-03 | Phase 3 | Pending |
+| GAME-04 | Phase 2 | Pending |
+| GAME-05 | Phase 2 | Pending |
+| GAME-06 | Phase 3 | Pending |
+| GAME-07 | Phase 2 | Pending |
+| GAME-08 | Phase 2 | Pending |
+| GAME-09 | Phase 2 | Pending |
+| GAME-10 | Phase 3 | Pending |
+| ADMIN-01 | Phase 4 | Pending |
+| ADMIN-02 | Phase 4 | Pending |
+| ADMIN-03 | Phase 4 | Pending |
+| ADMIN-04 | Phase 4 | Pending |
+| ADMIN-05 | Phase 4 | Pending |
+| ADMIN-06 | Phase 4 | Pending |
+| ADMIN-07 | Phase 4 | Pending |
+| QUEST-01 | Phase 4 | Pending |
+| QUEST-02 | Phase 4 | Pending |
+| QUEST-03 | Phase 4 | Pending |
+| QUEST-04 | Phase 4 | Pending |
+| QUEST-05 | Phase 4 | Pending |
+| QUEST-06 | Phase 4 | Pending |
+| QUEST-07 | Phase 4 | Pending |
+| AUDIO-01 | Phase 5 | Pending |
+| AUDIO-02 | Phase 5 | Pending |
+| AUDIO-03 | Phase 5 | Pending |
+| AUDIO-04 | Phase 5 | Pending |
+| AUDIO-05 | Phase 5 | Pending |
+| AUDIO-06 | Phase 5 | Pending |
+| STAT-01 | Phase 4 | Pending |
+| DEPLOY-01 | Phase 1 | Pending |
+| DEPLOY-02 | Phase 1 | Pending |
+| DEPLOY-03 | Phase 1 | Pending |
+| DEPLOY-04 | Phase 1 | Pending |
 
 **Coverage:**
-- v1 requirements: 34 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 34
+- v1 requirements: 40 total
+- Mapped to phases: 40 (roadmap complete)
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-05-28*
-*Last updated: 2026-05-28 after initial definition*
+*Last updated: 2026-05-28 after roadmap creation*
