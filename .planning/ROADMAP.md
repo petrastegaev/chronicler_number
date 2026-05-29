@@ -28,7 +28,7 @@
 **Plans**: 3 plans in 2 waves
 
 Plans:
-- [ ] `01-01-PLAN.md` (Wave 1) -- Backend Core: database.py, models.py, schemas.py, requirements.txt, project structure
+- [x] `01-01-PLAN.md` (Wave 1) -- Backend Core: database.py, models.py, schemas.py, requirements.txt, project structure
 - [ ] `01-02-PLAN.md` (Wave 1) -- Frontend Scaffold + Docker: Vite+React+TS project, Tailwind theme, Inter fonts, Docker multi-stage build
 - [ ] `01-03-PLAN.md` (Wave 2) -- WebSocket + REST API: ConnectionManager, QuestionService, questions router, main.py with lifespan + StaticFiles mount
 
@@ -98,7 +98,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/3 | Planned (3 plans, 2 waves) | - |
+| 1. Foundation | 1/3 | In progress (plan 01-01 complete) | - |
 | 2. Core Game Loop | 0/2 | Not started | - |
 | 3. Player Frontend | 0/3 | Not started | - |
 | 4. Admin Panel + Question Management | 0/3 | Not started | - |

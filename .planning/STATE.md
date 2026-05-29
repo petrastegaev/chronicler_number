@@ -3,23 +3,23 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 1 (Foundation)
-current_plan: None
+current_plan: 1 (Backend Core Infrastructure)
 status: executing
-last_updated: "2026-05-29T11:30:03.182Z"
+last_updated: "2026-05-29T12:10:30.182Z"
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 3
-  completed_plans: 0
-  percent: 0
+  completed_plans: 1
+  percent: 6
 ---
 
 # STATE: Дуэль чисел (Number Duel)
 
 **Current Phase:** 1 (Foundation)
-**Current Plan:** None
-**Status:** Ready to execute
-**Progress:** [█                   ] 5%
+**Current Plan:** 1 (Backend Core Infrastructure)
+**Status:** Plan 01-01 complete. Ready for Plan 01-02.
+**Progress:** [█                   ] 6%
 
 ## Project Reference
 
@@ -33,9 +33,9 @@ progress:
 |----------|-------|
 | Milestone | v1.0 -- Saint Highload 2026 Booth |
 | Phase | 1 (Foundation) |
-| Plan | None |
-| Status | Context gathered, ready for planning |
-| Progress bar | [█                   ] 5% |
+| Plan | 1 (Backend Core Infrastructure) |
+| Status | Plan 01-01 complete. Ready for Plan 01-02. |
+| Progress bar | [█                   ] 6% |
 
 ## Performance Metrics
 
@@ -55,6 +55,11 @@ progress:
 - Audio deferred to last phase: sound enhances a working game but does not block core functionality
 - Admin panel depends on player frontend being testable: admin needs real player connections to verify game controls
 - DEPLOY-01 (Docker) scaffolded in Phase 1 but full end-to-end verification happens in Phase 5
+- Flat Python module layout per D-02: backend/ with no nested src/ directory
+- All 4 tables created upfront in Phase 1 per D-04: questions, game_sessions, rounds, stats
+- Stat table with game_count counter per D-06 (not derived from COUNT query)
+- Category field is nullable VARCHAR per D-07, matching CSV import format text,answer[,category]
+- expire_on_commit=False on async_sessionmaker to prevent MissingGreenlet errors
 
 ### Open Questions
 
@@ -64,9 +69,8 @@ progress:
 
 ### Todo
 
-- [ ] User reviews and approves ROADMAP.md
-- [ ] User reviews STATE.md
-- [ ] After approval: run `/gsd-plan-phase 1` to start Foundation planning
+- [x] Plan 01-01: Backend Core Infrastructure (database.py, models.py, schemas.py, dependencies)
+- [ ] Next: Plan 01-02: Frontend Scaffold + Docker multi-stage build
 
 ### Blockers
 
@@ -75,8 +79,8 @@ progress:
 ## Session Continuity
 
 **Last session:** 2026-05-28 -- Project initialization (PROJECT.md, REQUIREMENTS.md, research)
-**This session:** Phase 1 context discussion — 4 gray areas resolved, 13 decisions captured
-**Next session:** Phase 1 planning (`/gsd-plan-phase 1`)
+**This session:** Plan 01-01 execution -- backend core infrastructure completed
+**Next session:** Plan 01-02 execution -- frontend scaffold + Docker multi-stage build
 
 ### Files Created/Updated
 
@@ -85,3 +89,12 @@ progress:
 - `.planning/REQUIREMENTS.md` -- Updated traceability section with phase mappings
 - `.planning/phases/01-foundation/01-CONTEXT.md` -- Created with 13 implementation decisions, canonical refs
 - `.planning/phases/01-foundation/01-DISCUSSION-LOG.md` -- Created audit trail of discussion
+- `.planning/phases/01-foundation/01-01-SUMMARY.md` -- Created for Plan 01-01 execution
+- `.gitignore` -- Created with Python, Node, Docker ignore patterns
+- `backend/__init__.py` -- Empty package init
+- `backend/routers/__init__.py` -- Empty package init
+- `backend/services/__init__.py` -- Empty package init
+- `backend/requirements.txt` -- Python dependencies
+- `backend/database.py` -- Async get_db FastAPI dependency
+- `backend/models.py` -- 4 ORM models (Question, GameSession, Round, Stat)
+- `backend/schemas.py` -- Pydantic v2 validation schemas
