@@ -44,7 +44,11 @@ Plans:
   5. After 9 rounds (random questions drawn without replacement from the pool), `game_end` event broadcasts final scores, round win counts, and winner declaration (or "Ничья" for ties)
   6. Game results persist to SQLite at game end, incrementing the game count
   7. Player nickname is preserved on WebSocket reconnect via session cookie
-**Plans**: TBD (2 plans estimated)
+**Plans**: 2 plans in 2 waves
+
+Plans:
+- [ ] `02-01-PLAN.md` (Wave 1) -- Core Game Engine: GameSession state machine, timer, scoring, persistence; session token store for JOIN-05
+- [ ] `02-02-PLAN.md` (Wave 2) -- WebSocket Integration + Contracts: main.py event dispatch, GameSession lifecycle; frontend TS types and Zustand store
 
 ### Phase 3: Player Frontend
 **Goal**: Two players can complete a full game -- join with nicknames, see questions, enter answers against a 10-second timer, view per-round results, and see final results on their respective devices.
