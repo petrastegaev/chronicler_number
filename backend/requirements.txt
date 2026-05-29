@@ -1,0 +1,8 @@
+fastapi==0.136.*
+uvicorn[standard]==0.48.*
+sqlalchemy==2.0.*
+aiosqlite==0.20.*
+python-multipart==0.0.*
+
+# Dev
+ruff==0.*
