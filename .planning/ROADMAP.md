@@ -7,7 +7,7 @@
 
 ## Phases
 
-- [ ] **Phase 1: Foundation** -- Backend infrastructure: FastAPI scaffold, SQLite WAL database, ConnectionManager, question service REST API, Docker Compose setup
+- [x] **Phase 1: Foundation** (completed 2026-05-29) -- Backend infrastructure: FastAPI scaffold, SQLite WAL database, ConnectionManager, question service REST API, Docker Compose setup
 - [ ] **Phase 2: Core Game Loop** -- Server-authoritative game state machine: GameSession, timer, proximity scoring, WebSocket game protocol, role assignment
 - [ ] **Phase 3: Player Frontend** -- Complete player experience: JoinScreen, GameScreen, RoundResult overlay, FinalScreen, Zustand stores, WebSocket client
 - [ ] **Phase 4: Admin Panel + Question Management** -- Mobile-first admin interface: game control, question CRUD, CSV import, game statistics
@@ -29,8 +29,8 @@
 
 Plans:
 - [x] `01-01-PLAN.md` (Wave 1) -- Backend Core: database.py, models.py, schemas.py, requirements.txt, project structure
-- [ ] `01-02-PLAN.md` (Wave 1) -- Frontend Scaffold + Docker: Vite+React+TS project, Tailwind theme, Inter fonts, Docker multi-stage build
-- [ ] `01-03-PLAN.md` (Wave 2) -- WebSocket + REST API: ConnectionManager, QuestionService, questions router, main.py with lifespan + StaticFiles mount
+- [x] `01-02-PLAN.md` (Wave 1) -- Frontend Scaffold + Docker: Vite+React+TS project, Tailwind theme, Inter fonts, Docker multi-stage build
+- [x] `01-03-PLAN.md` (Wave 2) -- WebSocket + REST API: ConnectionManager, QuestionService, questions router, main.py with lifespan + StaticFiles mount
 
 ### Phase 2: Core Game Loop
 **Goal**: The game state machine drives 9 rounds of numeric gameplay with server-authoritative timer, proximity scoring, and WebSocket event broadcasts. Player connections are managed with role assignment and session persistence.
@@ -98,7 +98,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 2/3 | In Progress|  |
+| 1. Foundation | 3/3 | Complete | 2026-05-29 |
 | 2. Core Game Loop | 0/2 | Not started | - |
 | 3. Player Frontend | 0/3 | Not started | - |
 | 4. Admin Panel + Question Management | 0/3 | Not started | - |
