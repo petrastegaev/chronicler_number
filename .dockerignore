@@ -1,0 +1,9 @@
+__pycache__/
+.git/
+.env
+.venv/
+*.pyc
+node_modules/
+frontend/node_modules/
+.planning/
+data/
