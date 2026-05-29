@@ -25,7 +25,12 @@
   3. WebSocket connections are accepted at the `/ws` endpoint
   4. SQLite database initializes with WAL mode (`PRAGMA journal_mode=WAL`) and required schema tables for questions and game statistics
   5. All static assets (React build, fonts, icons) are served locally without external CDN requests
-**Plans**: TBD (3 plans estimated)
+**Plans**: 3 plans in 2 waves
+
+Plans:
+- [ ] `01-01-PLAN.md` (Wave 1) -- Backend Core: database.py, models.py, schemas.py, requirements.txt, project structure
+- [ ] `01-02-PLAN.md` (Wave 1) -- Frontend Scaffold + Docker: Vite+React+TS project, Tailwind theme, Inter fonts, Docker multi-stage build
+- [ ] `01-03-PLAN.md` (Wave 2) -- WebSocket + REST API: ConnectionManager, QuestionService, questions router, main.py with lifespan + StaticFiles mount
 
 ### Phase 2: Core Game Loop
 **Goal**: The game state machine drives 9 rounds of numeric gameplay with server-authoritative timer, proximity scoring, and WebSocket event broadcasts. Player connections are managed with role assignment and session persistence.
@@ -93,7 +98,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/3 | Not started | - |
+| 1. Foundation | 0/3 | Planned (3 plans, 2 waves) | - |
 | 2. Core Game Loop | 0/2 | Not started | - |
 | 3. Player Frontend | 0/3 | Not started | - |
 | 4. Admin Panel + Question Management | 0/3 | Not started | - |
