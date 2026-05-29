@@ -12,7 +12,9 @@ Two conference attendees walk up, enter nicknames, and are playing within second
 
 ### Validated
 
-(None yet — ship to validate)
+(Validated in Phase 1: Foundation, 2026-05-29)
+
+- [x] Foundation infrastructure: FastAPI app server, SQLite WAL database, 4 ORM models, WebSocket /ws endpoint, REST API at /api/questions, Docker multi-stage build, Docker Compose deployment
 
 ### Active
 
