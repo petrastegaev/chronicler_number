@@ -63,10 +63,10 @@ Requirements for the Saint Highload 2026 booth. Each maps to roadmap phases.
 
 ### Deployment
 
-- [ ] **DEPLOY-01**: Full application starts with a single `docker compose up` command
+- [x] **DEPLOY-01**: Full application starts with a single `docker compose up` command
 - [x] **DEPLOY-02**: Application works fully offline — no internet connectivity required at runtime
 - [ ] **DEPLOY-03**: All static assets (React build, sounds, fonts, icons) served by FastAPI via StaticFiles
-- [ ] **DEPLOY-04**: Players connect via local WiFi at `http://<server-ip>:8000/`
+- [x] **DEPLOY-04**: Players connect via local WiFi at `http://<server-ip>:8000/`
 
 ## v2 Requirements
 
@@ -137,10 +137,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUDIO-05 | Phase 5 | Pending |
 | AUDIO-06 | Phase 5 | Pending |
 | STAT-01 | Phase 4 | Pending |
-| DEPLOY-01 | Phase 1 | Pending |
+| DEPLOY-01 | Phase 1 | Complete |
 | DEPLOY-02 | Phase 1 | Completed (01-01) |
 | DEPLOY-03 | Phase 1 | Pending |
-| DEPLOY-04 | Phase 1 | Pending |
+| DEPLOY-04 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 40 total
