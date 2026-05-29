@@ -3,29 +3,29 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 2 (Core Game Loop)
-current_plan: None
-status: planned
+current_plan: 1 (complete)
+status: executing 02-01
 last_updated: "2026-05-30T12:00:00Z"
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 5
-  completed_plans: 3
-  percent: 25
+  completed_plans: 4
+  percent: 30
 ---
 
 # STATE: Дуэль чисел (Number Duel)
 
 **Current Phase:** 2 (Core Game Loop)
-**Current Plan:** None
-**Status:** Phase 2 planned. Ready to execute.
-**Progress:** [█████               ] 25%
+**Current Plan:** 1 (complete)
+**Status:** Plan 02-01 complete. Ready for 02-02.
+**Progress:** [██████              ] 30%
 
 ## Project Reference
 
 **Core Value:** Two conference attendees walk up, enter nicknames, and are playing within seconds -- a smooth, impressive booth experience that draws a crowd with sound effects, timer tension, and instant results.
 
-**Current Focus:** Phase 2 planned with 2 plans in 2 waves. Ready for execution.
+**Current Focus:** Phase 2 executing -- Plan 02-01 (Core Game Engine) complete. Ready for 02-02 (WebSocket Integration).
 
 ## Current Position
 
@@ -33,15 +33,16 @@ progress:
 |----------|-------|
 | Milestone | v1.0 -- Saint Highload 2026 Booth |
 | Phase | 2 (Core Game Loop) |
-| Plan | None |
-| Status | Phase 2 planned. Ready to execute. |
-| Progress bar | [█████               ] 25% |
+| Plan | 1 (complete) |
+| Status | Plan 02-01 complete. Ready for 02-02. |
+| Progress bar | [██████              ] 30% |
 
 ## Performance Metrics
 
 | Metric | Baseline | Target | Current |
 |--------|----------|--------|---------|
 | Phase 1 plan duration | -- | -- | 3 min (Plan 01-02), 5 min (Plan 01-03) |
+| Phase 2 plan 02-01 duration | -- | -- | ~5 min |
 
 ## Accumulated Context
 
@@ -82,7 +83,7 @@ progress:
 - [x] Plan 01-01: Backend Core Infrastructure (database.py, models.py, schemas.py, dependencies)
 - [x] Plan 01-02: Frontend Scaffold + Docker multi-stage build
 - [x] Plan 01-03: ConnectionManager + Questions REST API + main.py entry point
-- [ ] Plan 02-01: Core Game Engine -- GameSession state machine, timer, scoring, persistence; session token store
+- [x] Plan 02-01: Core Game Engine -- GameSession state machine, timer, scoring, persistence; session token store (commit 54a10f6, efbe12d)
 - [ ] Plan 02-02: WebSocket Integration + Contracts -- main.py event dispatch, GameSession lifecycle; frontend TS types and Zustand store
 - [ ] Next after Phase 2: Phase 3 -- Player Frontend
 
@@ -92,13 +93,14 @@ progress:
 
 ## Session Continuity
 
-**Last session:** 2026-05-29 -- Plan 01-03 execution (ConnectionManager + Questions REST API + main.py entry point)
-**This session:** Phase 2 planning -- 02-01-PLAN.md and 02-02-PLAN.md created
-**Next session:** Phase 2 execution -- `/gsd-execute-phase 02-core-game-loop`
+**Last session:** Phase 2 planning -- 02-01-PLAN.md and 02-02-PLAN.md created
+**This session:** 2026-05-30 -- Plan 02-01 execution (GameSession + session token store)
+**Next session:** Plan 02-02 execution -- WebSocket Integration + Contracts
 
 ### Files Created/Updated
 
-- `.planning/ROADMAP.md` -- Updated Phase 2 plan list with 02-01 and 02-02
-- `.planning/STATE.md` -- Updated for Phase 2 planning completion
-- `.planning/phases/02-core-game-loop/02-01-PLAN.md` -- Created (340 lines)
-- `.planning/phases/02-core-game-loop/02-02-PLAN.md` -- Created (573 lines)
+- `backend/game/__init__.py` -- Created (empty package init)
+- `backend/game/session.py` -- Created (215 lines, GameSession class)
+- `backend/game/tokens.py` -- Created (21 lines, session token store)
+- `.planning/phases/02-core-game-loop/02-01-SUMMARY.md` -- Created
+- `.planning/STATE.md` -- Updated for Plan 02-01 completion
