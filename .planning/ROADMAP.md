@@ -102,7 +102,7 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 04-01-PLAN.md (Wave 1) Admin foundation: adminStore, useAdminWebSocket, GameControlTab with player slots/start/restart/score, AdminPage shell with bottom tab bar, stats endpoint
+- [x] 04-01-PLAN.md (Wave 1) Admin foundation: adminStore, useAdminWebSocket, GameControlTab with player slots/start/restart/score, AdminPage shell with bottom tab bar, stats endpoint
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -136,7 +136,7 @@ Plans:
 | 1. Foundation | 3/3 | Complete | 2026-05-29 |
 | 2. Core Game Loop | 2/2 | Complete    | 2026-06-10 |
 | 3. Player Frontend | 2/2 | Complete    | 2026-06-10 |
-| 4. Admin Panel + Question Management | 0/3 | Planning complete | - |
+| 4. Admin Panel + Question Management | 1/3 | In Progress|  |
 | 5. Audio + Deployment Polish | 0/2 | Not started | - |
 
 ## Dependency Graph
