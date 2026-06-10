@@ -105,7 +105,13 @@ export function useWebSocket() {
     }
 
     ws.onclose = () => {
-      useGameStore.setState({ ws: null, phase: 'idle' })
+      const currentPhase = useGameStore.getState().phase
+      // Only reset to idle if we haven't progressed past joining (not in-game)
+      if (currentPhase === 'idle' || currentPhase === 'joining') {
+        useGameStore.setState({ ws: null, phase: 'idle' })
+      } else {
+        useGameStore.setState({ ws: null })
+      }
     }
 
     wsRef.current = ws
