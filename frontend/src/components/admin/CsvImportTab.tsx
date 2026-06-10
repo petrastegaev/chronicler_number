@@ -112,7 +112,7 @@ export default function CsvImportTab() {
 
       // Refresh question list after successful upload
       if (data.added > 0) {
-        const listRes = await fetch(`${protocol}//${host}/api/questions?skip=0&limit=20`)
+        const listRes = await fetch(`${protocol}//${host}/api/questions/?skip=0&limit=20`)
         if (listRes.ok) {
           const listData = await listRes.json()
           setQuestions(listData.items)

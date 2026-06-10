@@ -26,7 +26,7 @@ export default function QuestionAddTab() {
     try {
       const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:'
       const host = window.location.host
-      const res = await fetch(`${protocol}//${host}/api/questions?skip=0&limit=20`)
+      const res = await fetch(`${protocol}//${host}/api/questions/?skip=0&limit=20`)
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data: { items: Question[]; total: number } = await res.json()
       setQuestions(data.items)

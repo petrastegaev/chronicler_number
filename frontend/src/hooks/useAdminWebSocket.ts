@@ -17,7 +17,7 @@ export function useAdminWebSocket() {
       ws.send(
         JSON.stringify({
           event: 'join',
-          data: { role: 'admin' },
+          data: { role: 'admin', admin_key: 'booth-admin-2026' },
         })
       )
     }
@@ -64,8 +64,20 @@ export function useAdminWebSocket() {
           break
         }
         case 'player_joined': {
-          const data = msg.data as { player2_nickname: string }
-          store.setPlayer2Nickname(data.player2_nickname)
+          const data = msg.data as {
+            player_number: number
+            nickname: string
+            player1_nickname?: string
+            player2_nickname?: string
+          }
+          if (data.player_number === 1) {
+            store.setPlayer1Nickname(data.nickname)
+          } else if (data.player_number === 2) {
+            store.setPlayer2Nickname(data.nickname)
+          }
+          // Also catch up with pre-filled nicknames from server
+          if (data.player1_nickname) store.setPlayer1Nickname(data.player1_nickname)
+          if (data.player2_nickname) store.setPlayer2Nickname(data.player2_nickname)
           break
         }
         default: {

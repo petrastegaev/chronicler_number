@@ -8,7 +8,7 @@ export default function GameStats() {
   useEffect(() => {
     const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:'
     const host = window.location.host
-    fetch(`${protocol}//${host}/api/stats`)
+    fetch(`${protocol}//${host}/api/stats/`)
       .then((res) => res.json())
       .then((data) => {
         setGameCount(data.game_count)
