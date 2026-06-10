@@ -3,6 +3,10 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 
+class StatsResponse(BaseModel):
+    game_count: int
+
+
 class QuestionCreate(BaseModel):
     text: str = Field(..., min_length=1, max_length=500)
     answer: int = Field(..., ge=0, le=1_000_000)
