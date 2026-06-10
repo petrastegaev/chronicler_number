@@ -62,8 +62,11 @@ Plans:
   5. After timer expires, player sees round result overlay: correct answer, own answer, opponent's answer, and winner indicator (blue/red highlight) displayed for 2-3 seconds
   6. After 9 rounds, final screen shows final scores, winner nickname (or "Ничья" for draw), and waits for admin to restart
   7. Player nickname is preserved across WebSocket reconnection via session cookie
-**Plans**: TBD (3 plans estimated)
-**UI hint**: yes
+**Plans**: 2 plans in 2 waves
+
+Plans:
+- [ ] `03-01-PLAN.md` (Wave 1) -- Core UI: extended Zustand store, WebSocket hook, JoinScreen, WaitingScreen, PlayingScreen, TimerRing, AnswerInput, GameHeader, GameScreen
+- [ ] `03-02-PLAN.md` (Wave 2) -- Result display: ResultOverlay, FinalScreen, ConnectionStatus, GameScreen wiring
 
 ### Phase 4: Admin Panel + Question Management
 **Goal**: Admin controls the game lifecycle and manages questions from a phone-optimized mobile interface. Questions can be added individually or imported via CSV. Game statistics are visible.
@@ -103,8 +106,8 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete | 2026-05-29 |
-| 2. Core Game Loop | 2/2 | Completed | 2026-06-10 |
-| 3. Player Frontend | 0/3 | Not started | - |
+| 2. Core Game Loop | 2/2 | Complete    | 2026-06-10 |
+| 3. Player Frontend | 0/2 | Not started | - |
 | 4. Admin Panel + Question Management | 0/3 | Not started | - |
 | 5. Audio + Deployment Polish | 0/2 | Not started | - |
 
