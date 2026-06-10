@@ -98,8 +98,12 @@ Plans:
   10. Admin is warned if fewer than 9 questions exist in the pool when attempting to start a game
   11. Admin can view total game count (persisted to SQLite from Phase 2)
 
-**Plans**: TBD (3 plans estimated)
-**UI hint**: yes
+**Plans**: 3 plans in 3 waves
+
+Plans:
+- [ ] 04-01-PLAN.md (Wave 1) Admin foundation: adminStore, useAdminWebSocket, GameControlTab with player slots/start/restart/score, AdminPage shell with bottom tab bar, stats endpoint
+- [ ] 04-02-PLAN.md (Wave 2) Question management: sub-tab navigation (Список/Добавить/CSV placeholder), paginated question list, add form, delete with confirmation, toast notifications
+- [ ] 04-03-PLAN.md (Wave 3) CSV import: backend endpoint with validation, frontend preview/confirm/result flow, game statistics display
 
 ### Phase 5: Audio + Deployment Polish
 
@@ -125,7 +129,7 @@ Plans:
 | 1. Foundation | 3/3 | Complete | 2026-05-29 |
 | 2. Core Game Loop | 2/2 | Complete    | 2026-06-10 |
 | 3. Player Frontend | 2/2 | Complete    | 2026-06-10 |
-| 4. Admin Panel + Question Management | 0/3 | Not started | - |
+| 4. Admin Panel + Question Management | 0/3 | Planning complete | - |
 | 5. Audio + Deployment Polish | 0/2 | Not started | - |
 
 ## Dependency Graph
