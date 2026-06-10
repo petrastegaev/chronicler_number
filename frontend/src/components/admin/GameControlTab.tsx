@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { useAdminStore } from '../../stores/adminStore'
 import { useAdminWebSocket } from '../../hooks/useAdminWebSocket'
+import GameStats from './GameStats'
 import PlayerSlot from './PlayerSlot'
 
 export default function GameControlTab() {
@@ -14,11 +15,8 @@ export default function GameControlTab() {
   const currentRound = useAdminStore((s) => s.currentRound)
   const totalRounds = useAdminStore((s) => s.totalRounds)
   const totalQuestions = useAdminStore((s) => s.totalQuestions)
-  const gameCount = useAdminStore((s) => s.gameCount)
-  const setGameCount = useAdminStore((s) => s.setGameCount)
 
   const connectedRef = useRef(false)
-  const [statsLoaded, setStatsLoaded] = useState(false)
 
   // Connect WebSocket once on mount
   useEffect(() => {
@@ -27,22 +25,7 @@ export default function GameControlTab() {
     connect()
   }, [connect])
 
-  // Fetch game count from REST API once on mount
-  useEffect(() => {
-    if (statsLoaded) return
-    const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:'
-    const host = window.location.host
-    fetch(`${protocol}//${host}/api/stats`)
-      .then((res) => res.json())
-      .then((data) => {
-        setGameCount(data.game_count)
-        setStatsLoaded(true)
-      })
-      .catch(() => {
-        // Stats unavailable — keep default 0
-        setStatsLoaded(true)
-      })
-  }, [setGameCount, statsLoaded])
+  // Game count fetched by <GameStats /> component
 
   // Derive online status: a player is online when their nickname is non-empty
   const player1Online = player1Nickname.length > 0
@@ -148,9 +131,7 @@ export default function GameControlTab() {
       )}
 
       {/* Statistics */}
-      <p className="text-center text-sm font-semibold text-wb-text-muted">
-        Сыграно игр: {gameCount}
-      </p>
+      <GameStats />
     </div>
   )
 }
