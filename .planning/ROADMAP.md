@@ -11,7 +11,7 @@
 - [x] **Phase 2: Core Game Loop** (completed 2026-06-10) -- Server-authoritative game state machine: GameSession, timer, proximity scoring, WebSocket game protocol, role assignment
 - [x] **Phase 3: Player Frontend** -- Complete player experience: JoinScreen, GameScreen, RoundResult overlay, FinalScreen, Zustand stores, WebSocket client (completed 2026-06-10)
 - [x] **Phase 4: Admin Panel + Question Management** -- Mobile-first admin interface: game control, question CRUD, CSV import, game statistics (completed 2026-06-10)
-- [ ] **Phase 5: Audio + Deployment Polish** -- Sound effects engine, venue hardening, offline deployment verification
+- [x] **Phase 5: Audio + Deployment Polish** -- Sound effects engine, venue hardening, offline deployment verification (completed 2026-06-11)
 
 ## Phase Details
 
@@ -76,8 +76,8 @@ Plans:
 **Plans**: 2 plans in 2 waves
 Plans:
 
-- [ ] `03-01-PLAN.md` (Wave 1) -- Core UI: extended Zustand store, WebSocket hook, JoinScreen, WaitingScreen, PlayingScreen, TimerRing, AnswerInput, GameHeader, GameScreen
-- [ ] `03-02-PLAN.md` (Wave 2) -- Result display: ResultOverlay, FinalScreen, ConnectionStatus, GameScreen wiring
+- [x] `03-01-PLAN.md` (Wave 1) -- Core UI: extended Zustand store, WebSocket hook, JoinScreen, WaitingScreen, PlayingScreen, TimerRing, AnswerInput, GameHeader, GameScreen
+- [x] `03-02-PLAN.md` (Wave 2) -- Result display: ResultOverlay, FinalScreen, ConnectionStatus, GameScreen wiring
 
 ### Phase 4: Admin Panel + Question Management
 
@@ -127,16 +127,24 @@ Plans:
   6. All four audio files are bundled in the Docker image -- zero external CDN requests verified via browser DevTools network tab
   7. Full `docker compose up` starts the complete application; fully functional offline with no internet connectivity (verified on a disconnected network)
 
-**Plans**: TBD (2 plans estimated)
+**Plans**: 2 plans in 2 waves
+Plans:
+**Wave 1**
+
+- [x] 05-01-PLAN.md (Wave 1) Audio engine: SoundManager singleton, useSoundEffects hook, 4 MP3 files, GameScreen wiring
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [x] 05-02-PLAN.md (Wave 2) Deployment verification: Docker image audio inclusion, offline test checklist, verification document
 
 ## Progress
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete | 2026-05-29 |
-| 2. Core Game Loop | 2/2 | Complete    | 2026-06-10 |
-| 3. Player Frontend | 2/2 | Complete    | 2026-06-10 |
-| 4. Admin Panel + Question Management | 3/3 | Complete   | 2026-06-10 |
+| 2. Core Game Loop | 2/2 | Complete | 2026-06-10 |
+| 3. Player Frontend | 2/2 | Complete | 2026-06-10 |
+| 4. Admin Panel + Question Management | 3/3 | Complete | 2026-06-10 |
 | 5. Audio + Deployment Polish | 0/2 | Not started | - |
 
 ## Dependency Graph
@@ -147,11 +155,11 @@ Phase 1: Foundation
     v
 Phase 2: Core Game Loop
     |
-    +----> Phase 3: Player Frontend
+    +-----> Phase 3: Player Frontend
     |          |
-    |          +----> Phase 4: Admin Panel + Question Management
+    |          +-----> Phase 4: Admin Panel + Question Management
     |                      |
-    +----------------------+----> Phase 5: Audio + Deployment Polish
+    +----------------------+-----> Phase 5: Audio + Deployment Polish
 ```
 
 ## Coverage Map
@@ -176,3 +184,5 @@ Phase 2: Core Game Loop
 | Audio deferred to last phase | Sound effects enhance a working game. The game must be fully playable and tested in silence before adding audio to avoid confounding variables during debugging |
 | Questions in admin phase not foundation | Question CRUD requires admin UI to be usable. Backend API is built in Phase 1 but the full feature (UI + CSV import) ships in Phase 4 |
 | DEPLOY mapped to Phase 1 | Docker infrastructure, offline static serving, and local WiFi access are established as the project foundation. Full feature verification happens across later phases |
+| Audio via SoundManager singleton + useSoundEffects hook | Howler.js (already in package.json) used directly without react-howler wrapper. Singleton pattern mirrors ConnectionManager. Hook subscribes to Zustand store transitions for event-driven playback. |
+| Deployment verification as separate plan | Audio implementation must complete before deployment verification can run (Wave 1 -> Wave 2). Verification is procedural (documentation + build + offline test), not code changes. |
