@@ -1,14 +1,19 @@
 ---
 phase: 04-admin-panel-question-management
-reviewed: 2026-06-10T12:00:00Z
+reviewed: 2026-06-10T21:30:00Z
 depth: standard
-files_reviewed: 19
+files_reviewed: 18
 files_reviewed_list:
   - backend/main.py
   - backend/routers/questions.py
   - backend/routers/stats.py
   - backend/schemas.py
   - backend/services/question_service.py
+  - backend/game/tokens.py
+  - backend/game/session.py
+  - backend/connection_manager.py
+  - backend/database.py
+  - backend/models.py
   - frontend/src/components/admin/BottomTabBar.tsx
   - frontend/src/components/admin/ConfirmDialog.tsx
   - frontend/src/components/admin/CsvImportTab.tsx
@@ -22,259 +27,308 @@ files_reviewed_list:
   - frontend/src/hooks/useAdminWebSocket.ts
   - frontend/src/pages/AdminPage.tsx
   - frontend/src/stores/adminStore.ts
-  - backend/game/session.py
-  - backend/game/tokens.py
-  - backend/connection_manager.py
-  - backend/models.py
-  - backend/database.py
-  - frontend/src/types/ws.ts
 findings:
-  critical: 3
+  critical: 2
   warning: 6
-  info: 3
+  info: 4
   total: 12
 status: issues_found
 ---
 
-# Phase 04: Code Review Report — Admin Panel + Question Management
+# Phase 04: Admin Panel and Question Management -- Code Review Report
 
-**Reviewed:** 2026-06-10T12:00:00Z
+**Reviewed:** 2026-06-10T21:30:00Z
 **Depth:** standard
-**Files Reviewed:** 19
+**Files Reviewed:** 18 (across backend/ and frontend/)
 **Status:** issues_found
 
 ## Summary
 
-This review covers the admin panel backend (FastAPI routes for questions and stats, CSV import, question service layer) and frontend (admin React components, WebSocket hook, Zustand store). The code is generally well-structured with good separation of concerns. However, several critical issues were found: CSV injection vulnerability via the question text field, a data loss edge case during CSV import with partial commit semantics, and a wrong HTTP method (POST instead of GET) for stats display. Several warnings around inconsistent error handling and race conditions in the admin WebSocket connection flow are also present.
+This review covers the admin panel backend (FastAPI routes for questions and stats, CSV import, question service layer, game session management, WebSocket handling) and frontend (admin React components, WebSocket hook, Zustand store). The codebase is generally well-structured with good separation of concerns. Two critical issues were found: an unauthenticated/unbounded CSV upload that can exhaust server memory, and a WebSocket answer injection race that bypasses the timer fairness window. Several warnings around resource leaks, missing input validation depth, and race conditions are also present.
 
 ## Critical Issues
 
-### CR-01: CSV Injection — malicious question text can execute formulas in Excel/Google Sheets
+### CR-01: CSV upload reads entire file into memory with no size limit (denial of service)
 
-**File:** `backend/services/question_service.py:51-93`
-**Issue:** The `csv_import` method reads CSV rows and stores question text verbatim in the database. When a CSV row like `=HYPERLINK("http://evil.com","Click here"),42` is imported, the text field starts with `=`. If an admin later exports questions or views them in a spreadsheet application, Excel/Google Sheets will execute the formula. This is a classic CSV injection (aka formula injection) vulnerability. The question text is displayed in the admin panel and could be used as an attack vector against booth staff who might export data.
+**File:** `backend/routers/questions.py:43-46`
+**Issue:** The `upload_csv` endpoint reads the entire uploaded file into memory with `await file.read()` before any size validation. FastAPI's `UploadFile` does not impose any default size limit. An admin (or anyone on the local WiFi) could upload a multi-gigabyte CSV that exhausts server memory and crashes the Docker container. The parsed content is decoded and iterated in `question_service.csv_import`, which holds every row in memory simultaneously and commits per-row (see WR-06). There is also no maximum row count enforced, so even a moderately large CSV with hundreds of thousands of valid rows creates an unbounded transaction that blocks the single SQLite connection.
 
-Note: This code does not itself generate a CSV export, but importing formula-prefixed data creates a downstream risk if any CSV export feature is added later or if the admin pastes data into a spreadsheet. The safe practice is to sanitize at import time.
+**Fix:** Impose a file size limit and a row count limit:
 
-**Fix:** In `csv_import`, after extracting `text = row[0].strip()`, prepend a single quote or reject text starting with `=`, `+`, `-`, `@`:
-
+In `backend/routers/questions.py`:
 ```python
-text = row[0].strip()
-if text and text[0] in ('=', '+', '-', '@'):
-    errors.append(f"Строка {row_num}: Текст вопроса не может начинаться с '{text[0]}' (защита от CSV-инъекции)")
-    continue
+MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB
+
+@router.post("/upload-csv", response_model=CsvImportResponse)
+async def upload_csv(file: UploadFile = File(...), db: AsyncSession = Depends(get_db)):
+    content = await file.read()
+    if len(content) > MAX_UPLOAD_SIZE:
+        raise HTTPException(status_code=413, detail="File too large (max 10 MB)")
+    result = await QuestionService.csv_import(db, content)
+    return CsvImportResponse(**result)
 ```
 
-### CR-02: CSV import commits valid rows even when some rows fail, without transactional rollback
-
-**File:** `backend/services/question_service.py:56-93`
-**Issue:** The `csv_import` method calls `await QuestionService.create(db, ...)` inside the loop (line 90), which performs `db.commit()` inside the `create` method (question_service.py line 29). This means each successfully imported row is committed individually. If an error occurs on a later row, the earlier rows are already persisted. There is no outer transaction wrapping the entire import. The caller (`upload_csv` in `questions.py:44-46`) does not manage a transaction either. This leads to partial imports, which can leave the database in an inconsistent state from the user's perspective (they see "added: 8" but may retry and get duplicates).
-
-**Fix:** Move the commit out of the individual `create` method and wrap the entire CSV import in a single transaction:
-
+In `backend/services/question_service.py`, add a row cap:
 ```python
-@staticmethod
-async def csv_import(db: AsyncSession, file_content: bytes) -> dict:
-    added = 0
-    errors: list[str] = []
-    reader = csv.reader(io.StringIO(file_content.decode("utf-8-sig")))
-    for row_num, row in enumerate(reader, start=1):
-        # ... validation logic (same) ...
-        question = Question(text=text, answer=answer, category=category)
-        db.add(question)
-        added += 1
-    if added > 0:
-        await db.commit()
-    return {"added": added, "errors": errors}
+MAX_ROWS = 5000
+# Inside the loop, after added += 1:
+if added >= MAX_ROWS:
+    errors.append(f"Import stopped: maximum {MAX_ROWS} rows exceeded")
+    break
 ```
 
-And revert `create` to not auto-commit, or introduce a separate bulk import method that doesn't commit per-row.
+### CR-02: Player answer submission race -- fairness window is ineffective due to event loop concurrency
 
-### CR-03: `game_reset` event on admin disconnect triggers full game cancellation with no confirmation
+**File:** `backend/main.py:194-198` + `backend/game/session.py:70-80`
+**Issue:** The `submit_answer` handler in `main.py` (line 194-198) validates the answer type/range and calls `active_session.submit_answer(player_num, answer)`. Inside `GameSession.submit_answer()` (session.py:112-119), the only guard is `if self.state != "accepting_answers": return`. However, the game loop and the WebSocket message handler run as concurrent asyncio tasks. The timer loop (session.py:70-77) uses `asyncio.sleep(1)` between ticks, which _does_ yield to the event loop -- meaning `submit_answer` calls from the WebSocket can be processed _during_ the timer loop, before the fairness window at line 80. The 50ms fairness window comes after the last `asyncio.sleep(1)`, but `submit_answer` calls that arrived during `remaining=0` sleep were already accepted (since `remaining=0` still has the state at `"accepting_answers"`). Additionally, answers arriving during the 50ms sleep after the loop are accepted before `self.state` changes to `"showing_result"`. The result: a player whose answer arrives just before or during the fairness window can have their answer counted even though the timer has expired on the server side.
 
-**File:** `backend/main.py:228-233`
-**Issue:** When the admin's WebSocket disconnects for any reason (network blip, phone goes to sleep, accidental page close), the code immediately cancels the `game_task` and sets `active_session = None`, terminating any in-progress game for both players. This is unrecoverable — both players are kicked and the game state is destroyed. The `reset_game()` function broadcasts `game_reset` to both players. There is no grace period, no reconnect window, and no way for the admin to resume the game that was in progress. While the admin reconnection path exists (lines 78-129, via token), it only handles the admin re-joining — the destroyed game session cannot be recovered because `active_session` is set to None.
-
-**Fix:** Implement a grace period before destroying the game state. For example, set a timer when admin disconnects during an active game, and only cancel if the admin doesn't reconnect within 15 seconds. OR, keep the game session alive and let reconnecting admin get a `state_snapshot` (which the reconnection path already partially supports on lines 111-121).
-
+**Fix:** Use a deadline timestamp instead of relying on the state machine and sleep-based window. In `_run_round`:
 ```python
-elif manager.admin == websocket:
-    manager.admin = None
-    # Don't immediately cancel if game is in progress
-    if active_session is not None and active_session.state not in ("waiting_for_players", "ready", "finished"):
-        # Set admin as disconnected but keep game running for a grace period
-        # A reconnecting admin can resume via token
-        pass
-    else:
-        if game_task is not None and not game_task.done():
-            game_task.cancel()
-            game_task = None
-            active_session = None
+import time
+
+async def _run_round(self, question):
+    self.p1_answer = None
+    self.p2_answer = None
+    self.state = "accepting_answers"
+    self.answer_deadline = time.monotonic() + 10.0
+
+    for remaining in range(10, -1, -1):
+        await self.manager.broadcast({"event": "timer_tick", "data": {"remaining": remaining}})
+        self._remaining = remaining
+        if remaining > 0:
+            await asyncio.sleep(1)
+
+    # Fairness window: give in-flight answers time to arrive
+    await asyncio.sleep(0.05)
+    self.state = "showing_result"
+```
+
+In `submit_answer`:
+```python
+def submit_answer(self, player_num: int, answer: int):
+    if self.state != "accepting_answers":
+        return
+    if time.monotonic() > getattr(self, 'answer_deadline', 0):
+        return
+    if player_num == 1 and self.p1_answer is None:
+        self.p1_answer = answer
+    elif player_num == 2 and self.p2_answer is None:
+        self.p2_answer = answer
 ```
 
 ## Warnings
 
-### WR-01: Stats endpoint returns wrong HTTP method — POST used where GET should be used
+### WR-01: Reconnect tokens grow unboundedly with no cleanup mechanism
 
-**File:** `frontend/src/components/admin/GameStats.tsx:9`
-**Issue:** The `GameStats` component correctly uses `fetch` (GET semantics), but the route at `/api/stats` exists. The issue is that the backend `stats.py` router uses the same response type as `CsvImportResponse` pattern but the stats data is not refreshed after game completion. More importantly, the `GameControlTab.tsx` component has a comment on line 28: "Game count fetched by <GameStats /> component". The `GameStats` component fetches stats via `fetch` in a `useEffect` with an empty dependency array, meaning it only fetches once on mount and never refreshes after a game finishes. This means the game count displayed in the admin panel will be stale for the entire session after the first load.
+**File:** `backend/game/tokens.py:4`
+**Issue:** The `_reconnect_tokens` dict grows without bound. Each call to `generate_token` adds an entry, but `remove_token` is defined but never called anywhere in the entire codebase. Every WebSocket connection ever made leaks a token entry. Over a multi-day booth event with many connections/reconnections, this creates a slow memory leak. Additionally, tokens have no time-to-live, so a token from yesterday's session remains valid.
 
-**Fix:** Trigger a stats refresh when the game phase transitions to `finished`. For example, expose a `refreshGameCount` callback from `GameStats` or move the fetch trigger into a `useEffect` that depends on a game-ended event:
-
-```typescript
-// In GameControlTab.tsx, add a key prop that changes when phase becomes 'finished'
-// This forces GameStats to remount and re-fetch
-<GameStats key={phase === 'finished' ? 'finished-' + Date.now() : 'lobby'} />
-```
-
-### WR-02: Admin WebSocket `connect` has no guard against duplicate connections
-
-**File:** `frontend/src/hooks/useAdminWebSocket.ts:9-88`
-**Issue:** The `connect` function creates a new WebSocket every time it is called. The `GameControlTab` component uses a `connectedRef` to call it only once (line 22-26), but this is a local ref in the component. If `GameControlTab` unmounts and remounts (which can happen due to React Strict Mode in development, or if the admin switches tabs and React re-renders the component tree), the ref resets and a duplicate WebSocket connection is created. The old one is closed via the cleanup effect (line 110-114), but there is a race window where two connections exist simultaneously and the server may reject the second one ("Admin slot already taken"). The cleanup effect closes the old connection on unmount, but the new connection's `onopen` fires before the old one is fully torn down.
-
-**Fix:** Move the `wsRef` check into the `connect` function itself:
-
-```typescript
-const connect = useCallback(() => {
-  if (wsRef.current && (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)) {
-    return // Already connected or connecting
-  }
-  // ... rest of connect logic
-}, [])
-```
-
-### WR-03: `player_joined` event handler does not set player1 nickname
-
-**File:** `frontend/src/hooks/useAdminWebSocket.ts:66-69`
-**Issue:** The `player_joined` event only updates `player2Nickname` (line 68). However, the `GameControlTab.tsx` component (line 36-37) checks `player1Nickname.length > 0` to determine if player 1 is online. When player 1 joins before player 2, the `joined` event for the admin (line 30-36 in the same hook) does not include `player1_nickname` or `player2_nickname` in the data — it only processes `role` and `token`. The `game_started` event (line 38-42) does set both nicknames via `setGameStarted`, but until the game starts, the admin UI will show player 1 as disconnected. The `joined` event from the server (main.py line 148-151) only sends `role` and `token` for admin — it does not include any player nicknames.
-
-**Fix:** Either the server should include current player nicknames in the admin's `joined` event, or the client should request them after joining. The fix on the server side in `main.py`:
-
+**Fix:** Call `remove_token` on WebSocket disconnect in `main.py`:
 ```python
-await websocket.send_json({
-    "event": "joined",
-    "data": {
-        "role": "admin",
-        "token": token,
-        "player1_nickname": manager.player1_nickname or "",
-        "player2_nickname": manager.player2_nickname or "",
-    }
+# In the WebSocketDisconnect handler (around line 221-233), at the end:
+from game.tokens import remove_token
+# The token needs to be tracked per connection -- store it on the websocket object
+# or pass it through the disconnect handler
+```
+
+Also add TTL-based expiry in `tokens.py`:
+```python
+import time
+_reconnect_tokens: dict[str, dict] = {}
+TOKEN_TTL = 3600  # 1 hour
+
+def generate_token(nickname: str, role: str) -> str:
+    token = uuid.uuid4().hex
+    _reconnect_tokens[token] = {"nickname": nickname, "role": role, "created_at": time.time()}
+    return token
+
+def restore_from_token(token: str) -> dict | None:
+    entry = _reconnect_tokens.get(token)
+    if entry is None:
+        return None
+    if time.time() - entry["created_at"] > TOKEN_TTL:
+        _reconnect_tokens.pop(token, None)
+        return None
+    return entry
+```
+
+### WR-02: Reconnecting player can displace existing player without closing old socket
+
+**File:** `backend/main.py:90-98`
+**Issue:** During reconnect (token-based resume), the code assigns the new WebSocket to `manager.player1` or `manager.player2` without ever closing the old WebSocket object. If a player's connection drops and they reconnect while the server still holds their old socket reference, the old socket becomes a zombie -- it may still appear to the server as an active connection but produce errors on `send_json` calls. The `all_connections` property (connection_manager.py:25-26) will include both old and new sockets, causing `broadcast` to hit the zombie socket. The `send_to_player` method (connection_manager.py:32-34) already catches exceptions, but this masks the underlying resource leak.
+
+**Fix:** Before reassigning a slot, close the existing connection:
+```python
+if role == "player":
+    nickname = session_data["nickname"]
+    # Check if reconnecting to existing slot
+    if manager.player1_nickname == nickname and manager.player1 is not None:
+        old_ws = manager.player1
+        manager.player1 = websocket
+        await old_ws.close()
+        player_num = 1
+    elif manager.player2_nickname == nickname and manager.player2 is not None:
+        old_ws = manager.player2
+        manager.player2 = websocket
+        await old_ws.close()
+        player_num = 2
+    else:
+        # Assign to empty slot
+        ...
+```
+
+### WR-03: Admin WebSocket authentication is absent -- anyone on the LAN can claim admin
+
+**File:** `backend/main.py:138-151`
+**Issue:** The WebSocket `join` event with `role: "admin"` requires no authentication. Any device on the local WiFi can connect as admin by sending `{"event": "join", "data": {"role": "admin"}}`. While this is a booth demo environment, the admin can start/restart games, reset sessions, and control the entire game flow. A malicious attendee could disrupt the demo by connecting as admin and issuing `start_game`, `restart`, or spamming the session. The "Admin slot already taken" check (line 139) prevents concurrent admins but does not prevent a race for the slot.
+
+**Fix:** Require an admin key, configured via environment variable:
+```python
+import os
+
+ADMIN_KEY = os.environ.get("ADMIN_KEY", "booth-admin-2026")
+
+# In the admin join handler:
+if role == "admin":
+    admin_key = data.get("data", {}).get("admin_key", "")
+    if admin_key != ADMIN_KEY:
+        await websocket.send_json({
+            "event": "error",
+            "data": {"message": "Unauthorized admin access"}
+        })
+        await websocket.close()
+        return
+```
+
+On the frontend, pass the admin key from a build-time or runtime configuration.
+
+### WR-04: `GameStats` component never refreshes after game completion
+
+**File:** `frontend/src/components/admin/GameStats.tsx:6`
+**Issue:** The `useEffect` that fetches `/api/stats` has an empty dependency array (`[]`), meaning stats are fetched exactly once on mount and never refreshed. After a game finishes, the game count increments in the database (session.py:211-213), but the admin panel continues to display the stale count from page load. The admin would need to refresh the page to see the updated count.
+
+**Fix:** Trigger a re-fetch when the game phase transitions. Add a dependency that changes when a game ends:
+```typescript
+// In GameControlTab.tsx, force remount by using phase as key:
+<GameStats key={phase} />
+```
+
+Or add the `phase` from the store as a dependency:
+```typescript
+// In GameStats.tsx
+const phase = useAdminStore((s) => s.phase)
+useEffect(() => {
+  fetch(...)
+    .then(...)
+    .catch(...)
+}, [phase])  // re-fetch when phase changes
+```
+
+### WR-05: CSV preview parser is naive -- does not handle quoted fields or encoding
+
+**File:** `frontend/src/components/admin/CsvImportTab.tsx:46-55`
+**Issue:** The CSV preview function splits lines by `\n` and fields by `,` (line.split(',')). This does not handle:
+1. Commas inside quoted fields (e.g., `"Question, part 2",42`)
+2. Newlines inside quoted fields (multi-line questions)
+3. The BOM character -- the backend handles this with `utf-8-sig` but the frontend uses plain `reader.readAsText(file)` without specifying encoding
+
+The backend's `csv.reader` handles all of these correctly, so imports will succeed but the preview will display incorrect data. This misleads the admin into thinking their CSV has parsing errors or shows truncated content.
+
+**Fix:** Either send the first N rows to the backend for preview, or use a proper CSV parser. A pragmatic approach: send the file to a new backend endpoint that returns parsed preview rows:
+```typescript
+// Send the full file to a preview endpoint
+const formData = new FormData()
+formData.append('file', selectedFile)
+const res = await fetch(`${protocol}//${host}/api/questions/preview-csv`, {
+  method: 'POST',
+  body: formData,
 })
 ```
 
-And on the client, handle them:
-```typescript
-case 'joined': {
-  const data = msg.data as { role?: string; token?: string; player1_nickname?: string; player2_nickname?: string }
-  store.setPhase('lobby')
-  if (data.token) store.setToken(data.token)
-  if (data.player1_nickname) store.setPlayer1Nickname(data.player1_nickname)
-  if (data.player2_nickname) store.setPlayer2Nickname(data.player2_nickname)
-  break
-}
-```
-
-### WR-04: `restart` event is sent but `reset_game()` does not update connection state for the admin
-
-**File:** `backend/main.py:218-219`
-**Issue:** When the admin clicks "Restart", the client sends `{event: "restart"}`, which calls `reset_game()`. This function sets `active_session = None` and broadcasts `game_reset` to all connections. However, after the restart, the admin's WebSocket connection is still the same connection that was used during the game. The `resume` path in `main.py` (line 78-129) checks for a `token` query parameter, but the restart flow does not send a new token or re-establish the admin's state. The admin will receive the `game_reset` event and the client's `resetForRestart` action sets the phase to `lobby`, but the admin's WebSocket is still connected with the old join — this works in practice but relies on the admin connection not having been cleaned up. More critically, if `reset_game()` runs while a game is in progress and the admin has a reconnect token that refers to the old session, that token is never invalidated.
-
-**Fix:** Clear reconnect tokens for all participants when resetting:
-
-```python
-# In reset_game() or nearby
-from game.tokens import _reconnect_tokens
-_reconnect_tokens.clear()
-```
-
-### WR-05: CSV preview parsing is naive — does not handle quoted commas or newlines in fields
-
-**File:** `frontend/src/components/admin/CsvImportTab.tsx:46-55`
-**Issue:** The CSV preview function splits by newline and then by comma (`line.split(',')`). This does not handle:
-1. Commas inside quoted fields (e.g., `"Question, part 2",42`)
-2. Newlines inside quoted fields (multi-line questions)
-3. BOM character at start of file (the backend handles this with `utf-8-sig` but the frontend uses `readAsText` without any encoding parameter)
-
-The preview will show incorrect data for any CSV that uses quoting, which is common for user-generated CSV files. The backend `QuestionService.csv_import` uses Python's `csv.reader` which handles all of these correctly, so the backend will import correctly but the preview will mislead the user.
-
-**Fix:** Either parse the CSV properly in the frontend (using a library like `papaparse` or a manual CSV parser), or send the file to the server for preview parsing:
-
-```typescript
-// Minimal improvement: send to backend for preview rows
-// This is more complex but avoids duplicating CSV parsing logic
-```
-
-### WR-06: `question_service.py::create` method on line 29 calls `db.commit()` per-insert, making bulk operations unsafe
+### WR-06: `question_service.create` commits per-insert, enabling the partial-import anti-pattern in CSV import
 
 **File:** `backend/services/question_service.py:26-31`
-**Issue:** The `create` method commits the session after every single question insert. This is called both from the single-question POST endpoint (expected) and from the CSV import loop (unexpected — see CR-02). Even for the single-question endpoint, auto-committing at this layer means any future code that calls this method within a larger transaction will have its inner transaction committed prematurely, violating the caller's transactional expectations. This is a design smell that encourages the partial-commit pattern.
+**Issue:** The `create` method calls `db.commit()` and `db.refresh()` after every single insert (lines 29-30). When called from the CSV import loop (line 90), each row is committed individually. If the import hits an error on row 50 (e.g., a database constraint failure), rows 1-49 are already committed. This is the classic partial-import bug (CR-02 in the previous review, which is already addressed by the CSV import refactoring recommendation). But the root cause is the `create` method's premature commit -- any future caller that uses `create` inside a larger transaction will have their transaction silently committed.
 
-**Fix:** Remove `db.commit()` and `db.refresh()` from `create`, and let the caller (the route handler) manage the transaction:
-
+**Fix:** Separate the commit responsibility from the `create` method. The route handler should be the transaction boundary:
 ```python
 @staticmethod
 async def create(db: AsyncSession, text: str, answer: int, category: str = None):
     question = Question(text=text, answer=answer, category=category)
     db.add(question)
-    return question  # caller commits
-```
-
-Then in the route handler:
-```python
-@router.post("/", response_model=QuestionResponse, status_code=201)
-async def create_question(data: QuestionCreate, db: AsyncSession = Depends(get_db)):
-    question = await QuestionService.create(db, text=data.text, answer=data.answer, category=data.category)
-    await db.commit()
-    await db.refresh(question)
+    await db.flush()
     return question
 ```
 
+The route handler (questions.py:28-32) then calls `db.commit()` and `db.refresh()` itself. This makes the transaction boundary explicit and prevents the CSV import from committing per-row.
+
 ## Info
 
-### IN-01: `GameStats.tsx` catch block is empty with only a comment
+### IN-01: Empty catch block in GameStats silently swallows network errors
 
-**File:** `frontend/src/components/admin/GameStats.tsx:13-15`
-**Issue:** The `.catch()` handler is empty — it silently swallows network errors. While this is a common pattern in React for non-critical data, there is no visual feedback to the admin that stats failed to load. At minimum, the error should be logged to console for debugging.
+**File:** `frontend/src/components/admin/GameStats.tsx:14-15`
+**Issue:** The `.catch()` handler is empty with only a comment (`// Network error ...`). Errors during stats fetch are silently swallowed with no console output, making debugging network issues harder during booth setup.
 
-**Fix:** Add `console.warn` or a comment explaining the intentional silence:
-
+**Fix:** Add a minimal log:
 ```typescript
 .catch((err) => {
   console.warn('[Stats] Failed to fetch game count:', err)
 })
 ```
 
-### IN-02: Magic number `9` appears in multiple places without a named constant
+### IN-02: Magic number `9` (round count) hardcoded in three files
 
-**Files:** `backend/main.py:208`, `backend/services/question_service.py:43-45`, `backend/game/session.py:45`
-**Issue:** The number `9` (number of questions per game) appears hardcoded in three different files. It is used as the round count (`range(1, 10)`), the random selection count, and the minimum check. If the round count ever changes, all three locations must be updated. This should be a named constant.
+**Files:** `backend/main.py:208`, `backend/services/question_service.py:43,45`, `backend/game/session.py:45`
+**Issue:** The number 9 (total rounds per game) is hardcoded as a literal in three separate files. Changing the round count requires updating three independent locations. This should be a named constant in a shared configuration module.
 
-**Fix:** Define `GAME_ROUND_COUNT = 9` in a shared config module:
-
+**Fix:**
 ```python
-# config.py or constants.py
+# backend/config.py
 GAME_ROUND_COUNT = 9
 ```
+Then reference it in all three files.
 
-### IN-03: `useAdminWebSocket` hook never sends `token` on reconnection
+### IN-03: Admin WebSocket `connect` does not pass reconnect token
 
-**File:** `frontend/src/hooks/useAdminWebSocket.ts:12-23`
-**Issue:** The `connect` function opens a WebSocket but does not include the stored `token` as a query parameter, even though the server supports reconnection via `token` query parameter (main.py lines 78-129). If the admin's WebSocket disconnects and the `GameControlTab` component remounts (triggering a new `connect` call), the new connection will not pass a token and will be treated as a fresh connection. This means a reconnecting admin cannot resume their session.
+**File:** `frontend/src/hooks/useAdminWebSocket.ts:12-13`
+**Issue:** The WebSocket URL is constructed without including any stored `token` as a query parameter. The server supports reconnection via `?token=<token>` (main.py:78-79), but the `connect` function never reads the token from the store. If the admin's WS disconnects and the component remounts, the new connection is treated as a fresh admin join rather than a reconnection. This means the admin reconnection path is dead code on the client side.
 
-**Fix:** Include the token in the WebSocket URL if one exists in the store:
-
+**Fix:**
 ```typescript
 const connect = useCallback(() => {
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
   const host = window.location.host
   const token = useAdminStore.getState().token
-  const wsUrl = token ? `${protocol}//${host}/ws?token=${token}` : `${protocol}//${host}/ws`
-  // ... rest of the function
+  const wsUrl = token ? `${protocol}//${host}/ws?token=${encodeURIComponent(token)}` : `${protocol}//${host}/ws`
+  // ... rest of logic
 }, [])
+```
+
+### IN-04: Duplicate URL construction pattern in 5 frontend files
+
+**Files:** `QuestionAddTab.tsx:27-29`, `QuestionListTab.tsx:33-35`, `CsvImportTab.tsx:74-76`, `GameStats.tsx:7-9`, `useAdminWebSocket.ts:9-11`
+**Issue:** The same protocol-detection + host concatenation pattern is repeated verbatim in 5 separate files:
+```typescript
+const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:'
+const host = window.location.host
+```
+This violates DRY. If the API base URL ever needs to change (e.g., adding a path prefix), all 5 locations must be updated. Extract this to a shared utility.
+
+**Fix:**
+```typescript
+// frontend/src/lib/api.ts
+export function apiBaseURL(): string {
+  return `${window.location.protocol}//${window.location.host}`
+}
+
+export function wsBaseURL(): string {
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+  return `${protocol}//${window.location.host}`
+}
 ```
 
 ---
 
-_Reviewed: 2026-06-10T12:00:00Z_
+_Reviewed: 2026-06-10T21:30:00Z_
 _Reviewer: Claude (gsd-code-reviewer)_
 _Depth: standard_
