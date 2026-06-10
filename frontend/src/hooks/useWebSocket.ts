@@ -22,9 +22,24 @@ export function useWebSocket() {
 
       switch (msg.event) {
         case 'joined': {
-          const data = msg.data as { player_number?: 1 | 2 }
+          const data = msg.data as {
+            player_number?: 1 | 2
+            player1_nickname?: string | null
+            player2_nickname?: string | null
+          }
           store.setPlayerNumber(data.player_number ?? null)
+          // If opponent is already connected, set their nickname (JOIN-04)
+          const opponentNick =
+            data.player_number === 1 ? data.player2_nickname : data.player1_nickname
+          if (opponentNick) {
+            store.setOpponentNickname(opponentNick)
+          }
           store.setPhase('waiting')
+          break
+        }
+        case 'player_joined': {
+          const data = msg.data as { player2_nickname: string }
+          store.setOpponentNickname(data.player2_nickname)
           break
         }
         case 'game_started': {

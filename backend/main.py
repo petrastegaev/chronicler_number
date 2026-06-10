@@ -169,8 +169,16 @@ async def websocket_endpoint(websocket: WebSocket):
                         "player_number": player_num,
                         "nickname": nickname,
                         "token": token,
+                        "player1_nickname": manager.player1_nickname,
+                        "player2_nickname": manager.player2_nickname,
                     }
                 })
+                # If player 2 just joined, notify player 1 (JOIN-04)
+                if player_num == 2 and manager.player1 is not None:
+                    await manager.send_to_player(1, {
+                        "event": "player_joined",
+                        "data": {"player2_nickname": nickname}
+                    })
 
         # Event dispatch loop
         while True:

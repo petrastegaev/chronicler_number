@@ -22,9 +22,8 @@ result: pass
 
 ### 3. Waiting Screen — Admin
 expected: When both players have joined, both screens change to show "Ожидание запуска администратором" indicating the game is ready and waiting for the admin to start.
-result: issue
-reported: "Both players see 'Ожидание соперника...' even after both have joined. The server never broadcasts the opponent's join event. player2Nickname is only populated via game_started — not when player 2 connects."
-severity: major
+result: pass
+verified: "2026-06-10T20:11Z — server now includes player1_nickname/player2_nickname in joined response, and broadcasts player_joined to player 1 when player 2 connects. Both players confirmed showing 'Ожидание запуска администратором' via Playwright."
 
 ### 4. Playing Screen Layout
 expected: When the admin starts the game, both players simultaneously see: the question text at ~40% height (36px font), the timer ring (88px SVG circle, top-right of center area), and the answer input field with "Ответить" button. The header shows "Раунд 1 / 9".
@@ -61,8 +60,8 @@ result: pass
 ## Summary
 
 total: 11
-passed: 10
-issues: 1
+passed: 11
+issues: 0
 pending: 0
 skipped: 0
 blocked: 0
@@ -70,20 +69,23 @@ blocked: 0
 ## Gaps
 
 - truth: "When both players have joined, both screens show 'Ожидание запуска администратором'"
-  status: failed
-  reason: "Server never broadcasts opponent join event. player2Nickname is only set on game_started, not when player 2 connects. The WaitingScreen condition `player2Nickname ? 'Ожидание запуска администратором' : 'Ожидание соперника...'` always evaluates to 'Ожидание соперника...' because player2Nickname stays empty until admin starts the game."
+  status: resolved
+  reason: "Fixed: server now includes player1_nickname/player2_nickname in joined response, and broadcasts player_joined to player 1 when player 2 connects. Frontend handles both."
   severity: major
   test: 3
-  root_cause: "Phase 02 server (main.py:157-172) sends 'joined' event only to the connecting player, never broadcasts to the already-connected player. The ConnectionManager tracks player1_nickname and player2_nickname but never exposes them to the other player until game_started."
+  root_cause: "Phase 02 server (main.py:157-172) sends 'joined' event only to the connecting player, never broadcasts to the already-connected player."
   artifacts:
     - path: "backend/main.py"
-      issue: "Join handler at line 157-172: no broadcast to other players when second player joins. Missing: when player_num==2, send player_joined event to player1 with player2's nickname."
-    - path: "backend/connection_manager.py"
-      issue: "No send_to_player broadcast method used for player join notifications. The ConnectionManager has player1_nickname/player2_nickname but no event to share them."
+      issue: "Fixed: added player1_nickname/player2_nickname to joined response, added player_joined broadcast to player 1 when player 2 connects"
+    - path: "frontend/src/stores/gameStore.ts"
+      issue: "Fixed: added setOpponentNickname action"
+    - path: "frontend/src/hooks/useWebSocket.ts"
+      issue: "Fixed: extract opponent nickname from joined response, added player_joined event handler"
   missing:
-    - "Server: broadcast 'player_joined' event to existing players when a new player connects"
-    - "Frontend: handle 'player_joined' event to update player2Nickname (or player1Nickname if joining as player 2)"
-    - "OR: Include player1_nickname and player2_nickname in the 'joined' response to the connecting player so they can populate both names"
+    - "[DONE] Server: broadcast player_joined to player 1 when player 2 joins"
+    - "[DONE] Server: include player1_nickname/player2_nickname in joined response"
+    - "[DONE] Frontend: setOpponentNickname action in gameStore"
+    - "[DONE] Frontend: handle joined opponent_nickname and player_joined event in useWebSocket"
 
 ## Fixes Applied During UAT
 

@@ -34,6 +34,7 @@ interface GameActions {
   resetRound: () => void
   setRoundResultData: (data: RoundResultEvent['data']) => void
   setGameEndResultData: (data: GameEndEvent['data']) => void
+  setOpponentNickname: (name: string) => void
 }
 
 type GameStore = GameState & GameActions
@@ -103,4 +104,5 @@ export const useGameStore = create<GameStore>((set) => ({
       gameEndResult: data,
       phase: 'finished',
     }),
+  setOpponentNickname: (name) => set({ player2Nickname: name }),
 }))
