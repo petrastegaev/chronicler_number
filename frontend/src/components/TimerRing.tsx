@@ -10,9 +10,9 @@ export default function TimerRing() {
   const progress = remaining / 10 // 1.0 (full) -> 0.0 (empty)
 
   const getColor = () => {
-    if (remaining <= 3) return '#EF4444' // danger
-    if (remaining <= 5) return '#F59E0B' // warning
-    return playerNumber === 1 ? '#3B82F6' : '#EF4444' // player accent
+    if (remaining <= 3) return 'var(--color-danger)' // danger
+    if (remaining <= 5) return 'var(--color-warning)' // warning
+    return playerNumber === 1 ? 'var(--color-player1)' : 'var(--color-player2)' // player accent
   }
 
   return (
@@ -30,7 +30,7 @@ export default function TimerRing() {
         cy="44"
         r={RADIUS}
         fill="none"
-        stroke="#2d1b4e"
+        stroke="var(--color-wb-surface)"
         strokeWidth="6"
       />
       {/* Animated progress ring */}
@@ -55,7 +55,7 @@ export default function TimerRing() {
         y="44"
         textAnchor="middle"
         dominantBaseline="central"
-        fill="#eeeeee"
+        fill="var(--color-wb-text)"
         fontSize="64"
         fontFamily="Inter, sans-serif"
         fontWeight="600"

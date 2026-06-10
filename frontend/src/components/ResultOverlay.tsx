@@ -23,14 +23,14 @@ export default function ResultOverlay() {
   const winnerText = isWinner ? 'Вы выиграли раунд!' : isLoser ? 'Соперник выиграл раунд' : 'Ничья'
 
   const winnerColor = roundResult.winner === 'draw'
-    ? '#eeeeee'
+    ? 'var(--color-wb-text)'
     : isWinner
-      ? playerNumber === 1 ? '#3B82F6' : '#EF4444'
-      : '#eeeeee'
+      ? playerNumber === 1 ? 'var(--color-player1)' : 'var(--color-player2)'
+      : 'var(--color-wb-text)'
 
   const myAnswerColor = isWinner
-    ? (playerNumber === 1 ? '#3B82F6' : '#EF4444')
-    : '#eeeeee'
+    ? (playerNumber === 1 ? 'var(--color-player1)' : 'var(--color-player2)')
+    : 'var(--color-wb-text)'
 
   return (
     <motion.div

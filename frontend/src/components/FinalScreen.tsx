@@ -12,10 +12,10 @@ export default function FinalScreen() {
     : null
 
   const winnerColor = gameEndResult?.winner === 'player1'
-    ? '#3B82F6'
+    ? 'var(--color-player1)'
     : gameEndResult?.winner === 'player2'
-      ? '#EF4444'
-      : '#eeeeee'
+      ? 'var(--color-player2)'
+      : 'var(--color-wb-text)'
 
   const isDraw = !gameEndResult?.winner
 
@@ -28,7 +28,7 @@ export default function FinalScreen() {
     >
       <h1
         className="text-[64px] font-semibold leading-[1.0]"
-        style={{ color: isDraw ? '#eeeeee' : winnerColor }}
+        style={{ color: isDraw ? 'var(--color-wb-text)' : winnerColor }}
       >
         {isDraw ? 'Ничья' : `Победитель: ${winnerNickname}`}
       </h1>
@@ -39,7 +39,7 @@ export default function FinalScreen() {
 
       <p
         className="mt-4 text-xl font-semibold leading-[1.3]"
-        style={{ color: '#3B82F6' }}
+        style={{ color: 'var(--color-player1)' }}
       >
         {gameEndResult?.player1_nickname ?? 'Игрок 1'}
         {': '}
@@ -48,7 +48,7 @@ export default function FinalScreen() {
 
       <p
         className="mt-2 text-xl font-semibold leading-[1.3]"
-        style={{ color: '#EF4444' }}
+        style={{ color: 'var(--color-player2)' }}
       >
         {gameEndResult?.player2_nickname ?? 'Игрок 2'}
         {': '}
