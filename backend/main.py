@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from connection_manager import ConnectionManager
 from models import Base
 from routers import questions as questions_router
+from routers import stats as stats_router
 from typing import Optional
 
 from game.session import GameSession
@@ -65,6 +66,7 @@ app = FastAPI(title="Duel Chisel", lifespan=lifespan)
 
 # 1. API routes FIRST (before StaticFiles mount)
 app.include_router(questions_router.router)
+app.include_router(stats_router.router)
 
 # 2. WebSocket endpoint
 @app.websocket("/ws")
