@@ -99,10 +99,17 @@ Plans:
   11. Admin can view total game count (persisted to SQLite from Phase 2)
 
 **Plans**: 3 plans in 3 waves
-
 Plans:
+**Wave 1**
+
 - [ ] 04-01-PLAN.md (Wave 1) Admin foundation: adminStore, useAdminWebSocket, GameControlTab with player slots/start/restart/score, AdminPage shell with bottom tab bar, stats endpoint
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 04-02-PLAN.md (Wave 2) Question management: sub-tab navigation (Список/Добавить/CSV placeholder), paginated question list, add form, delete with confirmation, toast notifications
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 04-03-PLAN.md (Wave 3) CSV import: backend endpoint with validation, frontend preview/confirm/result flow, game statistics display
 
 ### Phase 5: Audio + Deployment Polish
