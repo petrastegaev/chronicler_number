@@ -23,10 +23,15 @@ export default function AnswerInput() {
   // Auto-submit on timer expiry per D-10 with Pitfall 4 mitigation
   useEffect(() => {
     if (remaining === 0 && !submittedAnswer && phase === 'playing' && ws) {
+      if (myAnswer === null) {
+        // Don't submit empty/null answers — the player chose not to answer
+        setSubmittedAnswer(true)
+        return
+      }
       submitAnswer(myAnswer)
       setSubmittedAnswer(true)
     }
-  }, [remaining]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [remaining, myAnswer, submittedAnswer, phase, ws, submitAnswer, setSubmittedAnswer])
 
   return (
     <div className="flex flex-col items-center gap-3">
