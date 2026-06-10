@@ -89,7 +89,20 @@ async def websocket_endpoint(websocket: WebSocket):
                     "data": {"role": "admin", "nickname": nickname, "token": reconnect_token}
                 })
             elif role == "player":
-                if manager.player1 is None:
+                # Reconnect to existing slot by nickname
+                if manager.player1_nickname == nickname and manager.player1 is not None:
+                    old_ws = manager.player1
+                    manager.player1 = websocket
+                    websocket._reconnect_token = reconnect_token
+                    player_num = 1
+                    await old_ws.close()
+                elif manager.player2_nickname == nickname and manager.player2 is not None:
+                    old_ws = manager.player2
+                    manager.player2 = websocket
+                    websocket._reconnect_token = reconnect_token
+                    player_num = 2
+                    await old_ws.close()
+                elif manager.player1 is None:
                     manager.player1 = websocket
                     manager.player1_nickname = nickname
                     websocket._reconnect_token = reconnect_token
