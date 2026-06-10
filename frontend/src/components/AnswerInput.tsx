@@ -58,6 +58,7 @@ export default function AnswerInput() {
         </p>
       </div>
       <button
+        type="button"
         onClick={handleSubmit}
         disabled={isDisabled}
         className="flex min-h-[56px] items-center justify-center rounded-lg bg-player1 px-6 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"

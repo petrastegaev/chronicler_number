@@ -41,6 +41,7 @@ export default function JoinScreen() {
           className="w-full rounded-lg border border-wb-text-muted/30 bg-wb-bg px-4 py-3 text-base text-wb-text placeholder:text-wb-text-muted focus:border-player1 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         />
         <button
+          type="button"
           onClick={handleJoin}
           disabled={isSubmitting}
           className="mt-4 flex min-h-[56px] w-full items-center justify-center rounded-lg bg-player1 px-6 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
