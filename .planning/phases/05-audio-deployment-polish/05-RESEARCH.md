@@ -467,22 +467,19 @@ export default function WiFiWarning() {
 | A4 | Audio files will be ~20-50KB each (short sound effects) | Code Examples | LOW -- If files are larger (100KB+), preload time at startup increases. Not a functional blocker, but verify file sizes before bundling. |
 | A5 | `Howl.play()` is safe to call before preload completes | Code Examples | MEDIUM -- Howler.js queues `play()` calls if the sound is not yet loaded. If loading fails, the play silently does nothing. Verified via Howler.js source: `onplayerror` fires if play fails after load. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **What should the actual audio files (MP3s) sound like?**
    - What we know: tick is a short click (~0.1s), tick_fast is higher-pitched and faster cadence, end_round is a gong/bell (~1s), winner is a fanfare (~3s).
-   - What's unclear: Exact audio files need to be created or sourced from royalty-free libraries. Are they being generated programmatically or from a sound pack?
-   - Recommendation: Source from free sound effects libraries (freesound.org, Mixkit, ZapSplat), or generate simple tones/codes with a tool like `ffmpeg`. Keep each file under 100KB. For a game-show feel, end_round should be a "ding-ding-ding" bell and winner should be a short brass fanfare.
+   - RESOLVED: Source from free sound effects libraries (freesound.org, Mixkit, ZapSplat), or generate simple tones with `ffmpeg`/online tools. Keep each file under 100KB. For a game-show feel, end_round should be a "ding-ding-ding" bell and winner should be a short brass fanfare. Plan 05-01 Task 1 resolves this by including audio file sourcing as a checkpoint step.
 
 2. **Will the conference venue have captive portal on their WiFi?**
    - What we know: Captive portals are common at conferences (login pages). They redirect HTTP requests to a login page, which breaks the offline assumption.
-   - What's unclear: The specific venue WiFi setup.
-   - Recommendation: Booth staff should test with venue WiFi BEFORE the event day. If captive portal exists, staff should set up their own standalone hotspot router (common practice for gaming booths).
+   - RESOLVED: Booth staff should test with venue WiFi BEFORE the event day. If captive portal exists, staff should set up their own standalone hotspot router (common practice for gaming booths). Plan 05-02 Task 2 resolves this by documenting the procedure in a verification checklist.
 
 3. **Do we need audio fallback format (OGG) alongside MP3?**
    - What we know: MP3 works on all target browsers. Adding .ogg as a second source in Howler's `src` array adds ~40% more file size in the Docker image.
-   - What's unclear: Whether any older conference laptops run a Linux distro without MP3 codecs.
-   - Recommendation: Skip OGG for now. MP3 is universally compatible on modern browsers that run on 2019+ hardware. Add OGG only if testing reveals an issue.
+   - RESOLVED: Skip OGG. MP3 only. MP3 is universally compatible on modern browsers that run on 2019+ hardware. Add OGG only if testing reveals an issue. Plan 05-01 confirms this by referencing only `/sounds/{name}.mp3` paths.
 
 ## Environment Availability
 

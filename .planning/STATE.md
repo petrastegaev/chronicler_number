@@ -2,42 +2,42 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 04
+current_phase: 05
 current_plan: 1
-status: executing
-last_updated: "2026-06-10T20:42:47.097Z"
+status: planned
+last_updated: "2026-06-11T00:40:00.000Z"
 progress:
   total_phases: 5
-  completed_phases: 3
-  total_plans: 11
-  completed_plans: 8
-  percent: 60
+  completed_phases: 4
+  total_plans: 12
+  completed_plans: 10
+  percent: 83
 ---
 
 # STATE: Дуэль чисел (Number Duel)
 
-**Current Phase:** 04
+**Current Phase:** 05
 **Current Plan:** 1
-**Status:** Executing Phase 04
-**Progress:** [████████            ] 40%
+**Status:** Phase 05 planned — ready to execute
+**Progress:** [██████████████      ] 83%
 
 ## Project Reference
 
 **Core Value:** Two conference attendees walk up, enter nicknames, and are playing within seconds -- a smooth, impressive booth experience that draws a crowd with sound effects, timer tension, and instant results.
 
-**Current Focus:** Phase 04 — admin-panel-question-management
+**Current Focus:** Phase 05 — audio-deployment-polish
 
 ## Current Position
 
-Phase: 04 (admin-panel-question-management) — EXECUTING
-Plan: 1 of 3
+Phase: 05 (Audio + Deployment Polish) — PLANNED
+Plans: 2 (05-01, 05-02) in 2 waves
 | Property | Value |
 |----------|-------|
 | Milestone | v1.0 -- Saint Highload 2026 Booth |
-| Phase | 3 (Player Frontend) |
-| Plans | 03-01 (Wave 1), 03-02 (Wave 2) |
+| Phase | 5 (Audio + Deployment Polish) |
+| Plans | 05-01 (Wave 1), 05-02 (Wave 2) |
 | Status | Planning complete. Ready to execute. |
-| Progress bar | [████████            ] 40% |
+| Progress bar | [██████████████      ] 83% |
 
 ## Performance Metrics
 
@@ -94,8 +94,13 @@ Plan: 1 of 3
 - [x] Plan 01-03: ConnectionManager + Questions REST API + main.py entry point
 - [x] Plan 02-01: Core Game Engine -- GameSession state machine, timer, scoring, persistence; session token store
 - [x] Plan 02-02: WebSocket Integration + Contracts -- main.py event dispatch, GameSession lifecycle; frontend TS types and Zustand store
-- [ ] Plan 03-01 (Wave 1): Core UI -- Zustand store extension, useWebSocket hook, JoinScreen, WaitingScreen, PlayingScreen, TimerRing, AnswerInput, GameHeader, GameScreen
-- [ ] Plan 03-02 (Wave 2): Result display -- ResultOverlay, FinalScreen, ConnectionStatus, GameScreen wiring
+- [x] Plan 03-01 (Wave 1): Core UI -- Zustand store extension, useWebSocket hook, JoinScreen, WaitingScreen, PlayingScreen, TimerRing, AnswerInput, GameHeader, GameScreen
+- [x] Plan 03-02 (Wave 2): Result display -- ResultOverlay, FinalScreen, ConnectionStatus, GameScreen wiring
+- [x] Plan 04-01 (Wave 1): Admin foundation -- adminStore, useAdminWebSocket, GameControlTab, AdminPage shell, stats endpoint
+- [x] Plan 04-02 (Wave 2): Question management -- sub-tab navigation, paginated list, add form, delete with confirmation, toast
+- [x] Plan 04-03 (Wave 3): CSV import -- backend endpoint, frontend preview/confirm/result, game statistics
+- [ ] Plan 05-01 (Wave 1): Audio engine -- SoundManager singleton, useSoundEffects hook, 4 MP3 files, GameScreen wiring
+- [ ] Plan 05-02 (Wave 2): Deployment verification -- Docker audio inclusion, offline test checklist, VERIFICATION.md
 
 ### Blockers
 
