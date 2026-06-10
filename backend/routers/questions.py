@@ -39,8 +39,13 @@ async def delete_question(question_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Question not found")
 
 
+MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB
+
+
 @router.post("/upload-csv", response_model=CsvImportResponse)
 async def upload_csv(file: UploadFile = File(...), db: AsyncSession = Depends(get_db)):
     content = await file.read()
+    if len(content) > MAX_UPLOAD_SIZE:
+        raise HTTPException(status_code=413, detail="File too large (max 10 MB)")
     result = await QuestionService.csv_import(db, content)
     return CsvImportResponse(**result)

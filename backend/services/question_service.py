@@ -7,6 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from models import Question
 
 
+MAX_ROWS = 5000
+
+
 class QuestionService:
     @staticmethod
     async def get_all(db: AsyncSession, skip: int = 0, limit: int = 50):
@@ -89,5 +92,9 @@ class QuestionService:
 
             await QuestionService.create(db, text=text, answer=answer, category=category)
             added += 1
+
+            if added >= MAX_ROWS:
+                errors.append(f"Import stopped: maximum {MAX_ROWS} rows exceeded")
+                break
 
         return {"added": added, "errors": errors}
