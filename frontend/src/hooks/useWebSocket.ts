@@ -9,6 +9,7 @@ export function useWebSocket() {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
     const host = window.location.host
     const ws = new WebSocket(`${protocol}//${host}/ws`)
+    wsRef.current = ws
 
     ws.onopen = () => {
       useGameStore.setState({ ws })
@@ -114,7 +115,6 @@ export function useWebSocket() {
       }
     }
 
-    wsRef.current = ws
   }, [])
 
   const join = useCallback((nickname: string) => {
