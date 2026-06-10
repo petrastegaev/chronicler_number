@@ -493,12 +493,12 @@ No significant changes in the stack since Phase 1 research. All libraries are cu
 
 ## Open Questions
 
-1. **Question: Does the backend need a dedicated `GET /api/stats` endpoint, or can the admin query this alongside question list?**
+1. **Question: Does the backend need a dedicated `GET /api/stats` endpoint, or can the admin query this alongside question list? (RESOLVED)**
    - What we know: `Stat` model has `game_count` column. Existing code reads it in `_persist_game()`. No read endpoint exists.
    - What's unclear: The CONTEXT.md says admin needs "total game count" but doesn't specify the endpoint. The GDD says "кнопка Статистика" showing game count.
    - Recommendation: Create a simple `GET /api/stats` endpoint that reads the first `Stat` row and returns `{game_count: N}`. Register in a new `backend/routers/stats.py` router. Simple enough to be uncontentious.
 
-2. **Question: Should the question list pagination be client-side or server-side?**
+2. **Question: Should the question list pagination be client-side or server-side? (RESOLVED)**
    - What we know: `GET /api/questions/` already supports `skip` and `limit` query params. The admin needs a paginated table.
    - What's unclear: How many questions are expected (GDD says pool minimum 60). Server-side pagination is better for performance.
    - Recommendation: Use server-side pagination via the existing `skip`/`limit` params. Admin passes `?skip=0&limit=20` and gets a page. Frontend tracks page cursor in adminStore. Add a `total` count to the response so frontend knows page count.
