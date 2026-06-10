@@ -29,7 +29,7 @@ class QuestionService:
     async def create(db: AsyncSession, text: str, answer: int, category: str = None):
         question = Question(text=text, answer=answer, category=category)
         db.add(question)
-        await db.commit()
+        await db.flush()
         await db.refresh(question)
         return question
 
@@ -38,7 +38,6 @@ class QuestionService:
         question = await QuestionService.get_by_id(db, question_id)
         if question:
             await db.delete(question)
-            await db.commit()
             return True
         return False
 
@@ -97,4 +96,5 @@ class QuestionService:
                 errors.append(f"Import stopped: maximum {MAX_ROWS} rows exceeded")
                 break
 
+        await db.commit()
         return {"added": added, "errors": errors}

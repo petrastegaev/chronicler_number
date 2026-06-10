@@ -27,9 +27,12 @@ async def get_question(question_id: int, db: AsyncSession = Depends(get_db)):
 
 @router.post("/", response_model=QuestionResponse, status_code=201)
 async def create_question(data: QuestionCreate, db: AsyncSession = Depends(get_db)):
-    return await QuestionService.create(
+    question = await QuestionService.create(
         db, text=data.text, answer=data.answer, category=data.category
     )
+    await db.commit()
+    await db.refresh(question)
+    return question
 
 
 @router.delete("/{question_id}", status_code=204)
@@ -37,6 +40,7 @@ async def delete_question(question_id: int, db: AsyncSession = Depends(get_db)):
     deleted = await QuestionService.delete(db, question_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Question not found")
+    await db.commit()
 
 
 MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB
