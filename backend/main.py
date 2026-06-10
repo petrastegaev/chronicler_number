@@ -13,7 +13,7 @@ from routers import stats as stats_router
 from typing import Optional
 
 from game.session import GameSession
-from game.tokens import generate_token, restore_from_token
+from game.tokens import generate_token, remove_token, restore_from_token
 from services.question_service import QuestionService
 
 manager = ConnectionManager()
@@ -83,6 +83,7 @@ async def websocket_endpoint(websocket: WebSocket):
             role = session_data["role"]
             if role == "admin":
                 manager.admin = websocket
+                websocket._reconnect_token = reconnect_token
                 await websocket.send_json({
                     "event": "joined",
                     "data": {"role": "admin", "nickname": nickname, "token": reconnect_token}
@@ -91,10 +92,12 @@ async def websocket_endpoint(websocket: WebSocket):
                 if manager.player1 is None:
                     manager.player1 = websocket
                     manager.player1_nickname = nickname
+                    websocket._reconnect_token = reconnect_token
                     player_num = 1
                 elif manager.player2 is None:
                     manager.player2 = websocket
                     manager.player2_nickname = nickname
+                    websocket._reconnect_token = reconnect_token
                     player_num = 2
                 else:
                     await websocket.send_json({
@@ -145,6 +148,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     return
                 manager.admin = websocket
                 token = generate_token(nickname, "admin")
+                websocket._reconnect_token = token
                 await websocket.send_json({
                     "event": "joined",
                     "data": {"role": "admin", "token": token}
@@ -165,6 +169,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     manager.player2 = websocket
                     manager.player2_nickname = nickname
                 token = generate_token(nickname, "player")
+                websocket._reconnect_token = token
                 await websocket.send_json({
                     "event": "joined",
                     "data": {
@@ -219,6 +224,10 @@ async def websocket_endpoint(websocket: WebSocket):
                     await reset_game()
 
     except WebSocketDisconnect:
+        # Clean up reconnect token if tracked
+        token = getattr(websocket, '_reconnect_token', None)
+        if token:
+            remove_token(token)
         if manager.player1 == websocket:
             manager.player1 = None
             manager.player1_nickname = None
