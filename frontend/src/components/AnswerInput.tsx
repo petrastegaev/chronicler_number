@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useGameStore } from '../stores/gameStore'
 import { useWebSocket } from '../hooks/useWebSocket'
 
@@ -14,12 +14,12 @@ export default function AnswerInput() {
 
   const isDisabled = submittedAnswer || !ws
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     if (isDisabled) return
     if (myAnswer === null) return // Don't submit empty answers
     submitAnswer(myAnswer)
     setSubmittedAnswer(true)
-  }
+  }, [isDisabled, myAnswer, submitAnswer, setSubmittedAnswer])
 
   // Auto-submit on timer expiry per D-10 with Pitfall 4 mitigation
   useEffect(() => {

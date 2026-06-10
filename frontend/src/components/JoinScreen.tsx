@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { motion } from 'motion/react'
 import { useGameStore } from '../stores/gameStore'
 import { useWebSocket } from '../hooks/useWebSocket'
@@ -10,11 +10,11 @@ export default function JoinScreen() {
 
   const isSubmitting = phase === 'joining'
 
-  const handleJoin = () => {
+  const handleJoin = useCallback(() => {
     const trimmed = nickname.trim()
     if (!trimmed || isSubmitting) return
     join(trimmed)
-  }
+  }, [nickname, isSubmitting, join])
 
   return (
     <motion.div
