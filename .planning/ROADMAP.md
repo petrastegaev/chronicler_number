@@ -124,7 +124,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete | 2026-05-29 |
 | 2. Core Game Loop | 2/2 | Complete    | 2026-06-10 |
-| 3. Player Frontend | 0/2 | Not started | - |
+| 3. Player Frontend | 1/2 | In Progress|  |
 | 4. Admin Panel + Question Management | 0/3 | Not started | - |
 | 5. Audio + Deployment Polish | 0/2 | Not started | - |
 
