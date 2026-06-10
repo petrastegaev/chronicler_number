@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import type { RoundResultEvent, GameEndEvent } from '../types/ws'
 
 interface GameState {
   phase: string
@@ -11,7 +12,12 @@ interface GameState {
   totalRounds: number
   questionText: string
   remaining: number
-  // Phase 3 will add: wsConnection, submittedAnswer, roundResult, gameEndResult
+  // Phase 3 additions:
+  ws: WebSocket | null
+  submittedAnswer: boolean
+  myAnswer: number | null
+  roundResult: RoundResultEvent['data'] | null
+  gameEndResult: GameEndEvent['data'] | null
 }
 
 interface GameActions {
@@ -22,11 +28,15 @@ interface GameActions {
   setTimer: (remaining: number) => void
   setScoreUpdate: (p1Score: number, p2Score: number) => void
   reset: () => void
+  // Phase 3 additions:
+  setSubmittedAnswer: (value: boolean) => void
+  setMyAnswer: (value: number | null) => void
+  resetRound: () => void
 }
 
 type GameStore = GameState & GameActions
 
-const initialState: GameState = {
+export const initialState: GameState = {
   phase: 'idle',
   playerNumber: null,
   player1Nickname: '',
@@ -37,6 +47,12 @@ const initialState: GameState = {
   totalRounds: 9,
   questionText: '',
   remaining: 10,
+  // Phase 3 additions:
+  ws: null,
+  submittedAnswer: false,
+  myAnswer: null,
+  roundResult: null,
+  gameEndResult: null,
 }
 
 export const useGameStore = create<GameStore>((set) => ({
@@ -64,4 +80,14 @@ export const useGameStore = create<GameStore>((set) => ({
       player2Score: p2Score,
     }),
   reset: () => set(initialState),
+
+  // Phase 3 additions:
+  setSubmittedAnswer: (value) => set({ submittedAnswer: value }),
+  setMyAnswer: (value) => set({ myAnswer: value }),
+  resetRound: () =>
+    set({
+      submittedAnswer: false,
+      myAnswer: null,
+      roundResult: null,
+    }),
 }))
