@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
+import { useAdminStore } from '../../stores/adminStore'
 
 export default function GameStats() {
   const [gameCount, setGameCount] = useState(0)
+  const phase = useAdminStore((s) => s.phase)
 
   useEffect(() => {
     const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:'
@@ -14,7 +16,7 @@ export default function GameStats() {
       .catch(() => {
         // Network error — silently keep gameCount at 0
       })
-  }, [])
+  }, [phase])
 
   return (
     <p className="py-4 text-center text-sm font-semibold text-wb-text-muted">
