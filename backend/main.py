@@ -69,6 +69,7 @@ app.include_router(questions_router.router)
 # 2. WebSocket endpoint
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
+    global active_session, game_task
     await websocket.accept()
 
     # Reconnect path: check query param token (JOIN-05 / D-06)

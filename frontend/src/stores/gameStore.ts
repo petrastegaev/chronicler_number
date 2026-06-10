@@ -70,6 +70,7 @@ export const useGameStore = create<GameStore>((set) => ({
     }),
   setRoundStarted: (round, total, text) =>
     set({
+      phase: 'playing',
       currentRound: round,
       totalRounds: total,
       questionText: text,
