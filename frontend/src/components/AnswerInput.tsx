@@ -16,6 +16,7 @@ export default function AnswerInput() {
 
   const handleSubmit = () => {
     if (isDisabled) return
+    if (myAnswer === null) return // Don't submit empty answers
     submitAnswer(myAnswer)
     setSubmittedAnswer(true)
   }

@@ -124,6 +124,7 @@ export function useWebSocket() {
 
   const submitAnswer = useCallback((answer: number | null) => {
     const store = useGameStore.getState()
+    if (answer === null) return // Don't submit empty answers
     store.ws?.send(
       JSON.stringify({
         event: 'submit_answer',
