@@ -10,22 +10,22 @@ Requirements for the Saint Highload 2026 booth. Each maps to roadmap phases.
 ### Player Connection & Lobby
 
 - [ ] **JOIN-01**: Player navigates to `/` and sees a nickname input field (max 15 chars) with a "Присоединиться" button
-- [ ] **JOIN-02**: Server assigns roles in order of connection — first player gets "Игрок 1", second gets "Игрок 2"
+- [x] **JOIN-02**: Server assigns roles in order of connection — first player gets "Игрок 1", second gets "Игрок 2"
 - [ ] **JOIN-03**: After submitting nickname, player sees "Ожидание соперника..." until the second player joins
 - [ ] **JOIN-04**: When both players are ready, both screens show "Ожидание запуска администратором"
-- [ ] **JOIN-05**: Player nickname is stored in server memory and preserved on WebSocket reconnect via session cookie
+- [x] **JOIN-05**: Player nickname is stored in server memory and preserved on WebSocket reconnect via session cookie
 
 ### Core Game Loop
 
 - [ ] **GAME-01**: Admin starts the game; both players see "Раунд 1 / 9" and the first question
-- [ ] **GAME-02**: Each round has a 10-second server-authoritative countdown timer broadcast via WebSocket `timer_tick` events every second
+- [x] **GAME-02**: Each round has a 10-second server-authoritative countdown timer broadcast via WebSocket `timer_tick` events every second
 - [ ] **GAME-03**: Player enters an integer answer (0–1,000,000) in an input field; answer auto-submitted on timer expiry
-- [ ] **GAME-04**: Player answers are NOT broadcast to the opponent mid-round (prevents cheating)
-- [ ] **GAME-05**: After timer expires, server computes round winner by absolute difference to correct answer and broadcasts `round_result`
+- [x] **GAME-04**: Player answers are NOT broadcast to the opponent mid-round (prevents cheating)
+- [x] **GAME-05**: After timer expires, server computes round winner by absolute difference to correct answer and broadcasts `round_result`
 - [ ] **GAME-06**: Players see: correct answer, own answer, opponent's answer, and winner indicator (blue/red highlight) for 2–3 seconds
-- [ ] **GAME-07**: 9 random questions drawn without replacement from the question pool per game session
-- [ ] **GAME-08**: Round winner gets 1 point; ties split 0 points each
-- [ ] **GAME-09**: After 9 rounds, `game_end` event sent with final scores and winner announcement (or "Ничья")
+- [x] **GAME-07**: 9 random questions drawn without replacement from the question pool per game session
+- [x] **GAME-08**: Round winner gets 1 point; ties split 0 points each
+- [x] **GAME-09**: After 9 rounds, `game_end` event sent with final scores and winner announcement (or "Ничья")
 - [ ] **GAME-10**: End-of-game screen shows final score, winner nickname (or draw), and waits for admin reset
 
 ### Admin Panel — Game Control
@@ -102,19 +102,19 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | JOIN-01 | Phase 3 | Pending |
-| JOIN-02 | Phase 2 | Pending |
+| JOIN-02 | Phase 2 | Complete |
 | JOIN-03 | Phase 3 | Pending |
 | JOIN-04 | Phase 3 | Pending |
-| JOIN-05 | Phase 2 | Pending |
+| JOIN-05 | Phase 2 | Complete |
 | GAME-01 | Phase 3 | Pending |
-| GAME-02 | Phase 2 | Pending |
+| GAME-02 | Phase 2 | Complete |
 | GAME-03 | Phase 3 | Pending |
-| GAME-04 | Phase 2 | Pending |
-| GAME-05 | Phase 2 | Pending |
+| GAME-04 | Phase 2 | Complete |
+| GAME-05 | Phase 2 | Complete |
 | GAME-06 | Phase 3 | Pending |
-| GAME-07 | Phase 2 | Pending |
-| GAME-08 | Phase 2 | Pending |
-| GAME-09 | Phase 2 | Pending |
+| GAME-07 | Phase 2 | Complete |
+| GAME-08 | Phase 2 | Complete |
+| GAME-09 | Phase 2 | Complete |
 | GAME-10 | Phase 3 | Pending |
 | ADMIN-01 | Phase 4 | Pending |
 | ADMIN-02 | Phase 4 | Pending |

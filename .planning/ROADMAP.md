@@ -8,7 +8,7 @@
 ## Phases
 
 - [x] **Phase 1: Foundation** (completed 2026-05-29) -- Backend infrastructure: FastAPI scaffold, SQLite WAL database, ConnectionManager, question service REST API, Docker Compose setup
-- [ ] **Phase 2: Core Game Loop** -- Server-authoritative game state machine: GameSession, timer, proximity scoring, WebSocket game protocol, role assignment
+- [x] **Phase 2: Core Game Loop** (completed 2026-06-10) -- Server-authoritative game state machine: GameSession, timer, proximity scoring, WebSocket game protocol, role assignment
 - [ ] **Phase 3: Player Frontend** -- Complete player experience: JoinScreen, GameScreen, RoundResult overlay, FinalScreen, Zustand stores, WebSocket client
 - [ ] **Phase 4: Admin Panel + Question Management** -- Mobile-first admin interface: game control, question CRUD, CSV import, game statistics
 - [ ] **Phase 5: Audio + Deployment Polish** -- Sound effects engine, venue hardening, offline deployment verification
@@ -47,8 +47,8 @@ Plans:
 **Plans**: 2 plans in 2 waves
 
 Plans:
-- [ ] `02-01-PLAN.md` (Wave 1) -- Core Game Engine: GameSession state machine, timer, scoring, persistence; session token store for JOIN-05
-- [ ] `02-02-PLAN.md` (Wave 2) -- WebSocket Integration + Contracts: main.py event dispatch, GameSession lifecycle; frontend TS types and Zustand store
+- [x] `02-01-PLAN.md` (Wave 1) -- Core Game Engine: GameSession state machine, timer, scoring, persistence; session token store for JOIN-05
+- [x] `02-02-PLAN.md` (Wave 2) -- WebSocket Integration + Contracts: main.py event dispatch, GameSession lifecycle; frontend TS types and Zustand store
 
 ### Phase 3: Player Frontend
 **Goal**: Two players can complete a full game -- join with nicknames, see questions, enter answers against a 10-second timer, view per-round results, and see final results on their respective devices.
@@ -103,7 +103,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete | 2026-05-29 |
-| 2. Core Game Loop | 0/2 | Not started | - |
+| 2. Core Game Loop | 2/2 | Completed | 2026-06-10 |
 | 3. Player Frontend | 0/3 | Not started | - |
 | 4. Admin Panel + Question Management | 0/3 | Not started | - |
 | 5. Audio + Deployment Polish | 0/2 | Not started | - |

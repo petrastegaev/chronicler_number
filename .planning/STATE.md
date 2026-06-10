@@ -3,29 +3,29 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 2 (Core Game Loop)
-current_plan: 1 (complete)
-status: executing 02-01
-last_updated: "2026-05-30T12:00:00Z"
+current_plan: 2 (complete)
+status: completed
+last_updated: "2026-06-10T15:34:27Z"
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 5
-  completed_plans: 4
-  percent: 30
+  completed_plans: 5
+  percent: 40
 ---
 
 # STATE: Дуэль чисел (Number Duel)
 
 **Current Phase:** 2 (Core Game Loop)
-**Current Plan:** 1 (complete)
-**Status:** Plan 02-01 complete. Ready for 02-02.
-**Progress:** [██████              ] 30%
+**Current Plan:** 2 (complete)
+**Status:** Plan 02-02 complete. Ready for Phase 3.
+**Progress:** [████████            ] 40%
 
 ## Project Reference
 
 **Core Value:** Two conference attendees walk up, enter nicknames, and are playing within seconds -- a smooth, impressive booth experience that draws a crowd with sound effects, timer tension, and instant results.
 
-**Current Focus:** Phase 2 executing -- Plan 02-01 (Core Game Engine) complete. Ready for 02-02 (WebSocket Integration).
+**Current Focus:** Phase 2 executing -- Plan 02-02 (WebSocket Integration) complete. Ready for Phase 3 (Player Frontend).
 
 ## Current Position
 
@@ -33,9 +33,9 @@ progress:
 |----------|-------|
 | Milestone | v1.0 -- Saint Highload 2026 Booth |
 | Phase | 2 (Core Game Loop) |
-| Plan | 1 (complete) |
-| Status | Plan 02-01 complete. Ready for 02-02. |
-| Progress bar | [██████              ] 30% |
+| Plan | 2 (complete) |
+| Status | Plan 02-02 complete. Ready for Phase 3. |
+| Progress bar | [████████            ] 40% |
 
 ## Performance Metrics
 
@@ -43,6 +43,7 @@ progress:
 |--------|----------|--------|---------|
 | Phase 1 plan duration | -- | -- | 3 min (Plan 01-02), 5 min (Plan 01-03) |
 | Phase 2 plan 02-01 duration | -- | -- | ~5 min |
+| Phase 2 plan 02-02 duration | -- | -- | ~5 min |
 
 ## Accumulated Context
 
@@ -72,9 +73,15 @@ progress:
 - First-answer-wins answer collection; answers NEVER broadcast mid-round (D-12, GAME-04)
 - asyncio.shield() for game-end SQLite persistence to survive task cancellation
 
+### Decisions Added in Plan 02-02
+
+- admin start_game event embeds QuestionService.random_selection() inline inside the WebSocket handler, creating GameSession via asyncio.create_task() after sufficient questions verified
+- Reconnect path sends state_snapshot with current state, round number, remaining time, and question text (not full scores/answers) per D-06
+- game_task lifecycle check prevents double-session race: second start_game is silently ignored if game_task exists and is not done
+- admin disconnect cancels game_task and clears active_session to prevent orphan game loops
+
 ### Open Questions
 
-- Timer approach for Phase 2: resolved -- server broadcasts per-second ticks (D-01 picked this option)
 - Target tablet/phone models for audio and keyboard testing (noted as Research Flag -- decision deferred to Phase 5 planning)
 - Hotspot hardware and captive portal mitigation approach (noted as Research Flag -- decision deferred to Phase 5 planning)
 
@@ -84,7 +91,7 @@ progress:
 - [x] Plan 01-02: Frontend Scaffold + Docker multi-stage build
 - [x] Plan 01-03: ConnectionManager + Questions REST API + main.py entry point
 - [x] Plan 02-01: Core Game Engine -- GameSession state machine, timer, scoring, persistence; session token store (commit 54a10f6, efbe12d)
-- [ ] Plan 02-02: WebSocket Integration + Contracts -- main.py event dispatch, GameSession lifecycle; frontend TS types and Zustand store
+- [x] Plan 02-02: WebSocket Integration + Contracts -- main.py event dispatch, GameSession lifecycle; frontend TS types and Zustand store (commits 492fe86, 73ee597, 9d0814a)
 - [ ] Next after Phase 2: Phase 3 -- Player Frontend
 
 ### Blockers
@@ -93,14 +100,18 @@ progress:
 
 ## Session Continuity
 
-**Last session:** Phase 2 planning -- 02-01-PLAN.md and 02-02-PLAN.md created
-**This session:** 2026-05-30 -- Plan 02-01 execution (GameSession + session token store)
-**Next session:** Plan 02-02 execution -- WebSocket Integration + Contracts
+**Last session:** 2026-06-10 -- Plan 02-02 execution (WebSocket Integration + Contracts)
+**This session:** 2026-06-10 -- Plan 02-02 execution complete
+**Next session:** Phase 3 -- Player Frontend
 
 ### Files Created/Updated
 
 - `backend/game/__init__.py` -- Created (empty package init)
 - `backend/game/session.py` -- Created (215 lines, GameSession class)
 - `backend/game/tokens.py` -- Created (21 lines, session token store)
+- `backend/main.py` -- Modified (226 lines, game event dispatch, reconnect, tokens)
+- `frontend/src/types/ws.ts` -- Modified (126 lines, 11 game event interfaces)
+- `frontend/src/stores/gameStore.ts` -- Modified (68 lines, Zustand store with game state)
 - `.planning/phases/02-core-game-loop/02-01-SUMMARY.md` -- Created
-- `.planning/STATE.md` -- Updated for Plan 02-01 completion
+- `.planning/phases/02-core-game-loop/02-02-SUMMARY.md` -- Created
+- `.planning/STATE.md` -- Updated for Plan 02-02 completion
