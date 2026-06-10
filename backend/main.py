@@ -204,6 +204,16 @@ async def websocket_endpoint(websocket: WebSocket):
                         "player2_nickname": manager.player2_nickname,
                     }
                 })
+                # Notify admin of player join
+                await manager.send_to_admin({
+                    "event": "player_joined",
+                    "data": {
+                        "player_number": player_num,
+                        "nickname": nickname,
+                        "player1_nickname": manager.player1_nickname,
+                        "player2_nickname": manager.player2_nickname,
+                    }
+                })
                 # If player 2 just joined, notify player 1 (JOIN-04)
                 if player_num == 2 and manager.player1 is not None:
                     await manager.send_to_player(1, {
@@ -265,5 +275,22 @@ async def websocket_endpoint(websocket: WebSocket):
                 game_task = None
                 active_session = None
 
-# 3. StaticFiles mount MUST be LAST (prevents route shadowing)
+# 3. SPA fallback middleware — serves index.html for 404s on non-API GET requests
+from fastapi.responses import FileResponse
+from starlette.middleware.base import BaseHTTPMiddleware
+
+
+class SpaFallbackMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        if response.status_code == 404 and request.method == "GET":
+            path = request.url.path
+            if not path.startswith("/api/") and path != "/ws":
+                return FileResponse("static/index.html")
+        return response
+
+
+app.add_middleware(SpaFallbackMiddleware)
+
+# 4. StaticFiles mount (must be last)
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
