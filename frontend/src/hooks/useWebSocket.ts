@@ -51,7 +51,7 @@ export function useWebSocket() {
             player2_answer: number | null
             winner: 'player1' | 'player2' | 'draw'
           }
-          useGameStore.setState({ roundResult: data, phase: 'showing_result' })
+          store.setRoundResultData(data)
           break
         }
         case 'score_update': {
@@ -78,7 +78,7 @@ export function useWebSocket() {
               player2_answer: number | null
             }>
           }
-          useGameStore.setState({ gameEndResult: data, phase: 'finished' })
+          store.setGameEndResultData(data)
           break
         }
         case 'game_reset': {

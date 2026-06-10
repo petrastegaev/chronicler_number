@@ -32,6 +32,8 @@ interface GameActions {
   setSubmittedAnswer: (value: boolean) => void
   setMyAnswer: (value: number | null) => void
   resetRound: () => void
+  setRoundResultData: (data: RoundResultEvent['data']) => void
+  setGameEndResultData: (data: GameEndEvent['data']) => void
 }
 
 type GameStore = GameState & GameActions
@@ -89,5 +91,15 @@ export const useGameStore = create<GameStore>((set) => ({
       submittedAnswer: false,
       myAnswer: null,
       roundResult: null,
+    }),
+  setRoundResultData: (data) =>
+    set({
+      roundResult: data,
+      phase: 'showing_result',
+    }),
+  setGameEndResultData: (data) =>
+    set({
+      gameEndResult: data,
+      phase: 'finished',
     }),
 }))
