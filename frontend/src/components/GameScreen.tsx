@@ -6,15 +6,9 @@ import JoinScreen from './JoinScreen'
 import WaitingScreen from './WaitingScreen'
 import PlayingScreen from './PlayingScreen'
 import GameHeader from './GameHeader'
-
-// Stub components for ResultOverlay and FinalScreen -- will be replaced in 03-02
-function ResultOverlay() {
-  return null
-}
-
-function FinalScreen() {
-  return null
-}
+import ResultOverlay from './ResultOverlay'
+import FinalScreen from './FinalScreen'
+import ConnectionStatus from './ConnectionStatus'
 
 export default function GameScreen() {
   const phase = useGameStore((s) => s.phase)
@@ -45,6 +39,7 @@ export default function GameScreen() {
           <FinalScreen key="finished" />
         ) : null}
       </AnimatePresence>
+      <ConnectionStatus />
     </div>
   )
 }
