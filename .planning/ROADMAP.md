@@ -106,7 +106,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 04-02-PLAN.md (Wave 2) Question management: sub-tab navigation (Список/Добавить/CSV placeholder), paginated question list, add form, delete with confirmation, toast notifications
+- [x] 04-02-PLAN.md (Wave 2) Question management: sub-tab navigation (Список/Добавить/CSV placeholder), paginated question list, add form, delete with confirmation, toast notifications
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -136,7 +136,7 @@ Plans:
 | 1. Foundation | 3/3 | Complete | 2026-05-29 |
 | 2. Core Game Loop | 2/2 | Complete    | 2026-06-10 |
 | 3. Player Frontend | 2/2 | Complete    | 2026-06-10 |
-| 4. Admin Panel + Question Management | 1/3 | In Progress|  |
+| 4. Admin Panel + Question Management | 2/3 | In Progress|  |
 | 5. Audio + Deployment Polish | 0/2 | Not started | - |
 
 ## Dependency Graph
