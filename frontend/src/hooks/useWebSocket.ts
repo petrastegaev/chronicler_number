@@ -4,6 +4,7 @@ import type { WsMessage } from '../types/ws'
 
 export function useWebSocket() {
   const wsRef = useRef<WebSocket | null>(null)
+  const intentionalCloseRef = useRef(false)
 
   const connect = useCallback(() => {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
@@ -106,6 +107,10 @@ export function useWebSocket() {
     }
 
     ws.onclose = () => {
+      if (intentionalCloseRef.current) {
+        intentionalCloseRef.current = false
+        return // Skip reset — this was an intentional close
+      }
       const currentPhase = useGameStore.getState().phase
       // Only reset to idle if we haven't progressed past joining (not in-game)
       if (currentPhase === 'idle' || currentPhase === 'joining') {
@@ -141,6 +146,7 @@ export function useWebSocket() {
 
   useEffect(() => {
     return () => {
+      intentionalCloseRef.current = true
       wsRef.current?.close()
     }
   }, [])
