@@ -1,4 +1,5 @@
 import asyncio
+import time
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -23,6 +24,7 @@ class GameSession:
         self.p2_answer: Optional[int] = None
         self.round_results: list[dict] = []
         self._remaining: int = 10
+        self.answer_deadline: float = 0.0
         self.start_event = asyncio.Event()
 
     async def run(self, questions: list):
@@ -65,6 +67,7 @@ class GameSession:
             }
         })
         self.state = "accepting_answers"
+        self.answer_deadline = time.monotonic() + 10.0
 
         # Timer: 10 seconds, tick every 1 second (11 ticks: 10 down to 0)
         for remaining in range(10, -1, -1):
@@ -113,6 +116,8 @@ class GameSession:
         """Called from the WebSocket event dispatcher. First answer per player wins."""
         if self.state != "accepting_answers":
             return  # Round not active
+        if time.monotonic() > self.answer_deadline:
+            return  # Beyond fairness window
         if player_num == 1 and self.p1_answer is None:
             self.p1_answer = answer
         elif player_num == 2 and self.p2_answer is None:
