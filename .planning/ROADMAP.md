@@ -9,7 +9,7 @@
 
 - [x] **Phase 1: Foundation** (completed 2026-05-29) -- Backend infrastructure: FastAPI scaffold, SQLite WAL database, ConnectionManager, question service REST API, Docker Compose setup
 - [x] **Phase 2: Core Game Loop** (completed 2026-06-10) -- Server-authoritative game state machine: GameSession, timer, proximity scoring, WebSocket game protocol, role assignment
-- [ ] **Phase 3: Player Frontend** -- Complete player experience: JoinScreen, GameScreen, RoundResult overlay, FinalScreen, Zustand stores, WebSocket client
+- [x] **Phase 3: Player Frontend** -- Complete player experience: JoinScreen, GameScreen, RoundResult overlay, FinalScreen, Zustand stores, WebSocket client (completed 2026-06-10)
 - [ ] **Phase 4: Admin Panel + Question Management** -- Mobile-first admin interface: game control, question CRUD, CSV import, game statistics
 - [ ] **Phase 5: Audio + Deployment Polish** -- Sound effects engine, venue hardening, offline deployment verification
 
@@ -124,7 +124,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete | 2026-05-29 |
 | 2. Core Game Loop | 2/2 | Complete    | 2026-06-10 |
-| 3. Player Frontend | 1/2 | In Progress|  |
+| 3. Player Frontend | 2/2 | Complete   | 2026-06-10 |
 | 4. Admin Panel + Question Management | 0/3 | Not started | - |
 | 5. Audio + Deployment Polish | 0/2 | Not started | - |
 
