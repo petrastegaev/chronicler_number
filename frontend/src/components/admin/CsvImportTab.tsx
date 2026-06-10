@@ -43,10 +43,38 @@ export default function CsvImportTab() {
 
       const reader = new FileReader()
       reader.onload = () => {
-        const text = reader.result as string
+        let text = reader.result as string
+        // Strip BOM (byte order mark) if present — backend uses utf-8-sig
+        if (text.charCodeAt(0) === 0xFEFF) {
+          text = text.slice(1)
+        }
+        function parseCsvLine(line: string): string[] {
+          const parts: string[] = []
+          let current = ''
+          let inQuotes = false
+          for (let i = 0; i < line.length; i++) {
+            const ch = line[i]
+            if (ch === '"') {
+              // Handle escaped quotes inside quoted field
+              if (inQuotes && i + 1 < line.length && line[i + 1] === '"') {
+                current += '"'
+                i++
+              } else {
+                inQuotes = !inQuotes
+              }
+            } else if (ch === ',' && !inQuotes) {
+              parts.push(current)
+              current = ''
+            } else {
+              current += ch
+            }
+          }
+          parts.push(current)
+          return parts
+        }
         const lines = text.split('\n').filter((line) => line.trim())
         const parsed = lines.slice(0, 5).map((line) => {
-          const parts = line.split(',')
+          const parts = parseCsvLine(line)
           return {
             text: parts[0]?.trim() || '',
             answer: parts[1]?.trim() || '',
