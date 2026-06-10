@@ -21,29 +21,31 @@ created: 2026-06-10
 | Preset | not applicable |
 | Component library | none (hand-built components) |
 | Icon library | Inline SVG only (bundled locally, no external CDN) |
-| Font | Inter (self-hosted WOFF2: Regular 400, SemiBold 600, Bold 700) |
+| Font | Inter (self-hosted WOFF2: Regular 400, SemiBold 600) |
 
 **Source:** CLAUDE.md (stack), web_design.md section 4.2 (typography), frontend/src/index.css (tokens).
+
+**Note on Bold (700):** The Bold weight is loaded in `index.css` for the font face but is NOT used in the declared typography scale. The 600 (SemiBold) weight covers all heading/display roles with sufficient contrast at the sizes used (36px+). This keeps the contract at exactly 2 declared weights per dimension requirements.
 
 ---
 
 ## Spacing Scale
 
-Declared values (8-point scale):
+Declared values (8-point scale — all multiples of 4):
 
 | Token | Value | Usage |
 |-------|-------|-------|
 | xs | 4px | Inline padding within compact elements |
-| sm | 8px | Compact element gaps, input padding |
-| md | 16px | Default element spacing, card padding |
-| lg | 24px | Section padding, button padding |
+| sm | 8px | Compact element gaps, input padding, header vertical padding |
+| md | 16px | Default element spacing, card padding, header horizontal padding |
+| lg | 24px | Section padding, card padding (result overlay) |
 | xl | 32px | Layout gaps between major blocks |
 | 2xl | 48px | Major section breaks, centering offsets |
 | 3xl | 64px | Page-level top/bottom spacing |
 
 Exceptions:
-- Timer digit container: 88px diameter ring (56px inner digit area with 16px padding each side) — larger than 64px default because it is the focal visual element.
-- Submit button minimum height: 56px touch target (not a multiple of 8, per D-08 requirement for tablet touch targets).
+- Submit button minimum height: **56px** (not a multiple of 4). Justified as a **touch-target ergonomics constraint** per D-08 requirement for tablet use. This is not a layout spacing token — it is a minimum-tap-target rule applied only to the submit button. Layout gaps and padding still follow the 8-point scale.
+- Timer digit container: **88px outer diameter** ring (not a multiple of 4). The 56px inner digit area plus 16px padding on each side = 88px. This is a component geometry, not a spacing token. The padding around it (16px) follows the scale.
 
 **Source:** 03-CONTEXT.md D-08 (56px touch target), web_design.md section 4 (8px grid reference).
 
@@ -53,18 +55,20 @@ Exceptions:
 
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
-| Body | 16px | 400 (Regular) | 1.5 |
-| Label / Score | 20px | 600 (SemiBold) | 1.3 |
-| Nickname / Player name | 24px | 600 (SemiBold) | 1.2 |
-| Question text | 40px | 700 (Bold) | 1.2 |
-| Timer digits | 64px | 700 (Bold) | 1.0 |
-| Answer input | 36px | 600 (SemiBold) | 1.3 |
-| Round result answer | 28px | 600 (SemiBold) | 1.3 |
-| Title / Display | 48px | 700 (Bold) | 1.1 |
+| Body / Labels | 16px | 400 (Regular) | 1.5 |
+| Score / Nickname / Secondary text | 20px | 600 (SemiBold) | 1.3 |
+| Question text / Answer input | 36px | 600 (SemiBold) | 1.2 |
+| Timer digits / Display / Title | 64px | 600 (SemiBold) | 1.0 |
 
-**Source:** web_design.md section 4.2 (question 32-48px, timer 56-72px, score/nickname 20-24px), adjusted to specific values matching the phase requirements.
+**Rationale:**
+- **16px, 400 weight, 1.5 line-height** — body text, labels, placeholder copy, small text elements. Matches the Tailwind base layer in `index.css`.
+- **20px, 600 weight, 1.3 line-height** — score values, nickname display, round result labels ("Ваш ответ:", "Правильный ответ:"), round indicator ("Раунд N / 9"). This single size covers the 20-24px range from `web_design.md` with semi-bold weight.
+- **36px, 600 weight, 1.2 line-height** — question text and answer input value. Falls within the D-08 32-40px input range and the web_design.md 32-48px question range at the lower end; semi-bold at this size reads clearly on booth screens.
+- **64px, 600 weight, 1.0 line-height** — timer digits, game-end winner announcement, page title. Falls within D-01 56-72px timer range. Semi-bold at 64px provides strong visibility without the cognitive heaviness of full bold.
 
-**Font stack:** `'Inter', system-ui, sans-serif` for all text. Monospace faces (`--font-mono`) defined in theme but not used in Phase 3 — timer digits use bold Inter because the fixed-width digit is already monospaced by nature of Inter's numerals.
+**Font stack:** `'Inter', system-ui, sans-serif` for all text. Monospace faces (`--font-mono`) defined in theme but not used in Phase 3 — timer digits use bold Inter because Inter's numerals are naturally monospaced.
+
+**Source:** 03-CONTEXT.md D-01 (timer 56-72px), D-08 (input 32-40px); web_design.md section 4.2 (question 32-48px, score/nickname 20-24px).
 
 ---
 
@@ -73,12 +77,12 @@ Exceptions:
 | Role | Value | Usage |
 |------|-------|-------|
 | Dominant (60%) | `#1a0a2e` (`wb-bg`) | Main background, full-screen overlays (semi-transparent: `rgba(26, 10, 46, 0.85)`) |
-| Secondary (30%) | `#2d1b4e` (`wb-surface`) | Cards, result overlay card, input field backgrounds, status blocks |
+| Secondary (30%) | `#2d1b4e` (`wb-surface`) | Cards, result overlay card, input field backgrounds, status blocks, header bar |
 | Accent — Player 1 (10%) | `#3B82F6` (`player1`) | Player 1's nickname, score, timer ring default, answer highlight, winner glow |
 | Accent — Player 2 (10%) | `#EF4444` (`player2`) | Player 2's nickname, score, timer ring default, answer highlight, winner glow |
-| Correct answer | `#10B981` (`correct`) | Correct answer display on result overlay |
-| Warning | `#F59E0B` (`warning`) | Timer ring at remaining <= 5 seconds |
-| Danger | `#EF4444` (`danger`) | Timer ring at remaining <= 3 seconds |
+| Correct answer | `#10B981` (`correct`) | Correct answer value label on result overlay |
+| Warning | `#F59E0B` (`warning`) | Timer ring at remaining <= 5 seconds. No other purpose. |
+| Danger | `#EF4444` (`danger`) | Timer ring at remaining <= 3 seconds. No other purpose. |
 | Text primary | `#eeeeee` (`wb-text`) | All body text, question text, labels |
 | Text muted | `#9ca3af` (`wb-text-muted`) | Placeholder text, secondary info, hints |
 
@@ -184,7 +188,7 @@ idle --> joining --> waiting --> playing --> showing_result --> playing (loop)
 
 ### Answer Input (D-08, D-09, D-10, D-11)
 
-- `<input type="number" min="0" max="1000000">`, full-width, 36px font, minimum 56px height.
+- `<input type="number" min="0" max="1000000">`, full-width, 36px font at weight 600, minimum 56px height.
 - Triggers numeric keyboard on tablets (type="number").
 - Immediate local echo — value updates on keystroke, no server round-trip.
 - Submit button («Ответить») adjacent to input: primary action button, 56px height, rounded, white text on player accent color background.
@@ -197,19 +201,19 @@ idle --> joining --> waiting --> playing --> showing_result --> playing (loop)
 - Centered card (`wb-surface` background, 24px padding, rounded-xl) fades in (Motion fade+scaleY, 300ms ease-out).
 - Display duration: ~3 seconds (server-controlled via `asyncio.sleep(3)` between `round_result` and next `round_started`).
 - Layout (vertical stack, centered text):
-  1. **Winner indicator:** «Вы выиграли раунд!» or «Соперник выиграл раунд» or «Ничья» — 24px bold, player accent color for win, danger for loss, white for draw.
-  2. **Your answer:** «Ваш ответ: {value}» — 28px semi-bold, player accent color if winning, white otherwise.
-  3. **Correct answer:** «Правильный ответ: {value}» — 28px semi-bold, `correct` green (#10B981).
-  4. **Opponent's answer:** «Ответ соперника: {value}» — 24px semi-bold, white.
+  1. **Winner indicator:** «Вы выиграли раунд!» or «Соперник выиграл раунд» or «Ничья» — 20px semi-bold (score/nickname size), player accent color for win, danger for loss, white for draw.
+  2. **Your answer:** «Ваш ответ: {value}» — 20px semi-bold, player accent color if winning, white otherwise.
+  3. **Correct answer:** «Правильный ответ: {value}» — 20px semi-bold, `correct` green (#10B981).
+  4. **Opponent's answer:** «Ответ соперника: {value}» — 20px semi-bold, white.
 - Auto-dismisses when next `round_started` event received. Smooth fade-out 200ms.
 
 ### Header Bar (D-14)
 
 - Present on all screens during `playing`, `showing_result`, and `finished` phases.
 - Positioned at top, full-width, `wb-surface` background, 8px vertical padding, 16px horizontal padding.
-- Left: player's own nickname (16px, player accent color).
-- Center: game title «Дуэль чисел» (14px, muted text).
-- Right: score (20px bold, player accent color) + round indicator (14px, muted text: «Раунд N / 9»).
+- Left: player's own nickname (16px, weight 400, player accent color).
+- Center: game title «Дуэль чисел» (16px, weight 400, muted text).
+- Right: score (20px semi-bold, player accent color) + round indicator (16px, weight 400, muted text: «Раунд N / 9»).
 - Not present on `idle`/`joining`/`waiting` screens — those screens show the title as a centered display element instead.
 
 ### Crossfade Transitions (D-12, D-13)
