@@ -1,16 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_db
+from models import Question
 from schemas import QuestionCreate, QuestionResponse
 from services.question_service import QuestionService
 
 router = APIRouter(prefix="/api/questions", tags=["questions"])
 
 
-@router.get("/", response_model=list[QuestionResponse])
+@router.get("/")
 async def list_questions(skip: int = 0, limit: int = 50, db: AsyncSession = Depends(get_db)):
-    return await QuestionService.get_all(db, skip=skip, limit=limit)
+    questions = await QuestionService.get_all(db, skip=skip, limit=limit)
+    total = (await db.execute(select(func.count(Question.id)))).scalar_one()
+    return {"items": questions, "total": total}
 
 
 @router.get("/{question_id}", response_model=QuestionResponse)

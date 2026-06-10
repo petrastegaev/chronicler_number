@@ -5,6 +5,7 @@ interface Question {
   text: string
   answer: number
   category: string | null
+  created_at: string
 }
 
 interface AdminState {
@@ -40,6 +41,7 @@ interface AdminActions {
   setQuestions: (questions: Question[]) => void
   setTotalQuestions: (total: number) => void
   setCsvResult: (result: { added: number; errors: string[] } | null) => void
+  clearCsvResult: () => void
   setToken: (token: string | null) => void
   setGameStarted: (p1Nickname: string, p2Nickname: string) => void
   setScoreUpdate: (p1Score: number, p2Score: number) => void
@@ -84,6 +86,7 @@ export const useAdminStore = create<AdminStore>((set) => ({
   setQuestions: (questions) => set({ questions }),
   setTotalQuestions: (total) => set({ totalQuestions: total }),
   setCsvResult: (result) => set({ csvResult: result }),
+  clearCsvResult: () => set({ csvResult: null }),
   setToken: (token) => set({ token }),
 
   setGameStarted: (p1Nickname, p2Nickname) =>
