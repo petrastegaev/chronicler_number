@@ -55,7 +55,12 @@ export function useWebSocket() {
           break
         }
         case 'score_update': {
-          const data = msg.data as { player1_score: number; player2_score: number }
+          const data = msg.data as { player1_score: number; player2_score: number; round_number?: number }
+          if (data.round_number !== undefined && data.round_number !== store.currentRound) {
+            console.warn(
+              `[WS] score_update round_number mismatch: got ${data.round_number}, expected ${store.currentRound}`
+            )
+          }
           store.setScoreUpdate(data.player1_score, data.player2_score)
           break
         }
