@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useAdminStore } from '../../stores/adminStore'
+import CsvImportTab from './CsvImportTab'
 import QuestionListTab from './QuestionListTab'
 import QuestionAddTab from './QuestionAddTab'
 
@@ -70,9 +71,7 @@ export default function QuestionsTab() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
             >
-              <p className="mt-8 text-center text-sm text-wb-text-muted">
-                CSV импорт (будет реализовано)
-              </p>
+              <CsvImportTab />
             </motion.div>
           )}
         </AnimatePresence>

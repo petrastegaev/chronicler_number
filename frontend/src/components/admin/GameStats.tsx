@@ -1,0 +1,24 @@
+import { useEffect, useState } from 'react'
+
+export default function GameStats() {
+  const [gameCount, setGameCount] = useState(0)
+
+  useEffect(() => {
+    const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:'
+    const host = window.location.host
+    fetch(`${protocol}//${host}/api/stats`)
+      .then((res) => res.json())
+      .then((data) => {
+        setGameCount(data.game_count)
+      })
+      .catch(() => {
+        // Network error — silently keep gameCount at 0
+      })
+  }, [])
+
+  return (
+    <p className="py-4 text-center text-sm font-semibold text-wb-text-muted">
+      Сыграно игр: {gameCount}
+    </p>
+  )
+}

@@ -1,3 +1,6 @@
+import csv
+import io
+
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -42,3 +45,49 @@ class QuestionService:
             select(Question).order_by(func.random()).limit(count)
         )
         return result.scalars().all()
+
+    @staticmethod
+    async def csv_import(db: AsyncSession, file_content: bytes) -> dict:
+        """Parse CSV content, validate each row, and import valid questions.
+
+        Expected CSV format: text,answer[,category]
+        Returns: {"added": int, "errors": list[str]}
+        """
+        added = 0
+        errors: list[str] = []
+
+        reader = csv.reader(io.StringIO(file_content.decode("utf-8-sig")))
+        for row_num, row in enumerate(reader, start=1):
+            # Skip empty rows
+            if not row or all(cell.strip() == "" for cell in row):
+                continue
+
+            if len(row) < 2:
+                errors.append(f"Строка {row_num}: недостаточно полей")
+                continue
+
+            text = row[0].strip()
+            if not text:
+                errors.append(f"Строка {row_num}: Пустой текст вопроса")
+                continue
+
+            answer_str = row[1].strip()
+            try:
+                answer = int(answer_str)
+            except (ValueError, TypeError):
+                errors.append(f"Строка {row_num}: Ответ не является целым числом")
+                continue
+
+            if not (0 <= answer <= 1_000_000):
+                errors.append(f"Строка {row_num}: Ответ вне диапазона (0-1 000 000)")
+                continue
+
+            category = row[2].strip() if len(row) > 2 and row[2].strip() else None
+            if category is not None and len(category) > 255:
+                errors.append(f"Строка {row_num}: Категория слишком длинная")
+                continue
+
+            await QuestionService.create(db, text=text, answer=answer, category=category)
+            added += 1
+
+        return {"added": added, "errors": errors}
