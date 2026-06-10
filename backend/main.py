@@ -1,4 +1,5 @@
 import asyncio
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -15,6 +16,8 @@ from typing import Optional
 from game.session import GameSession
 from game.tokens import generate_token, remove_token, restore_from_token
 from services.question_service import QuestionService
+
+ADMIN_KEY = os.environ.get("ADMIN_KEY", "booth-admin-2026")
 
 manager = ConnectionManager()
 active_session: Optional[GameSession] = None
@@ -152,6 +155,14 @@ async def websocket_endpoint(websocket: WebSocket):
             nickname = data.get("data", {}).get("nickname", "")
 
             if role == "admin":
+                admin_key = data.get("data", {}).get("admin_key", "")
+                if admin_key != ADMIN_KEY:
+                    await websocket.send_json({
+                        "event": "error",
+                        "data": {"message": "Unauthorized admin access"}
+                    })
+                    await websocket.close()
+                    return
                 if manager.admin is not None:
                     await websocket.send_json({
                         "event": "error",
