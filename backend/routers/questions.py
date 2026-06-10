@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_db
 from models import Question
-from schemas import QuestionCreate, QuestionResponse
+from schemas import CsvImportResponse, QuestionCreate, QuestionResponse
 from services.question_service import QuestionService
 
 router = APIRouter(prefix="/api/questions", tags=["questions"])
@@ -37,3 +37,10 @@ async def delete_question(question_id: int, db: AsyncSession = Depends(get_db)):
     deleted = await QuestionService.delete(db, question_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Question not found")
+
+
+@router.post("/upload-csv", response_model=CsvImportResponse)
+async def upload_csv(file: UploadFile = File(...), db: AsyncSession = Depends(get_db)):
+    content = await file.read()
+    result = await QuestionService.csv_import(db, content)
+    return CsvImportResponse(**result)
