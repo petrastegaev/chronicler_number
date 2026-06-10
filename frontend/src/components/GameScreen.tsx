@@ -26,7 +26,7 @@ export default function GameScreen() {
   return (
     <div className="relative min-h-screen bg-wb-bg overflow-hidden">
       {showHeader && <GameHeader />}
-      <AnimatePresence mode="wait">
+      <AnimatePresence>
         {phase === 'idle' || phase === 'joining' ? (
           <JoinScreen key="join" />
         ) : phase === 'waiting' ? (
