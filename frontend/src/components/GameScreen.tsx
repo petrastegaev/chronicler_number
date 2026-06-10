@@ -21,7 +21,7 @@ export default function GameScreen() {
     if (!ws) {
       connect()
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [ws, connect])
 
   return (
     <div className="relative min-h-screen bg-wb-bg overflow-hidden">
