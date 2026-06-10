@@ -93,6 +93,14 @@ export function useWebSocket() {
           store.setTimer(data.remaining)
           break
         }
+        default: {
+          if (msg.event === 'error') {
+            const errorData = msg.data as { message?: string }
+            console.error('[WS] Server error:', errorData.message ?? 'Unknown error')
+            store.setPhase('idle')
+          }
+          break
+        }
       }
     }
 
