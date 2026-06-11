@@ -145,7 +145,7 @@ Plans:
 | 2. Core Game Loop | 2/2 | Complete | 2026-06-10 |
 | 3. Player Frontend | 2/2 | Complete | 2026-06-10 |
 | 4. Admin Panel + Question Management | 3/3 | Complete | 2026-06-10 |
-| 5. Audio + Deployment Polish | 1/2 | In Progress|  |
+| 5. Audio + Deployment Polish | 2/2 | Complete   | 2026-06-11 |
 
 ## Dependency Graph
 
