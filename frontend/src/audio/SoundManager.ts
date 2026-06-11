@@ -23,8 +23,8 @@ class SoundManager {
           src: [src],
           preload: true,
           volume: name === 'tick' || name === 'tick_fast' ? 0.5 : 1.0,
-          onloaderror: (_id: number, errCode: number) => {
-            console.warn(`[Audio] Failed to load ${name}: code ${errCode}`)
+          onloaderror: (_id: number, error: unknown) => {
+            console.warn(`[Audio] Failed to load ${name}:`, error)
           },
         })
       )
