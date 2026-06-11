@@ -16,19 +16,32 @@ Two conference attendees walk up, enter nicknames, and are playing within second
 
 - [x] Foundation infrastructure: FastAPI app server, SQLite WAL database, 4 ORM models, WebSocket /ws endpoint, REST API at /api/questions, Docker multi-stage build, Docker Compose deployment
 
+(Validated in Phase 2: Core Game Loop, 2026-05-31)
+
+- [x] Two players connect from separate devices and set nicknames
+- [x] 9 rounds with random numeric-answer questions and 10-second timer
+- [x] Real-time scoring: closest answer wins the round, most round wins takes the game
+
+(Validated in Phase 3: Player Frontend, 2026-06-06)
+
+- [x] End-of-game results screen with winner announcement
+
+(Validated in Phase 4: Admin Panel + Questions, 2026-06-10)
+
+- [x] Admin can see connected players and launch the game when ready
+- [x] Admin panel: game control tab (launch, restart, live score)
+- [x] Admin panel: question management (add single, CSV import, list)
+- [x] Admin panel: basic game count statistics
+
+(Validated in Phase 5: Audio + Deployment Polish, 2026-06-11)
+
+- [x] Sound effects: tick, fast tick (<3s), round-end gong, victory fanfare
+- [x] Docker Compose one-command deployment
+- [x] Fully offline — all assets local, no CDN dependencies
+
 ### Active
 
-- [ ] Two players connect from separate devices and set nicknames
-- [ ] Admin can see connected players and launch the game when ready
-- [ ] 9 rounds with random numeric-answer questions and 10-second timer
-- [ ] Real-time scoring: closest answer wins the round, most round wins takes the game
-- [ ] Sound effects: tick, fast tick (<3s), round-end gong, victory fanfare
-- [ ] End-of-game results screen with winner announcement
-- [ ] Admin panel: game control tab (launch, restart, live score)
-- [ ] Admin panel: question management (add single, CSV import, list)
-- [ ] Admin panel: basic game count statistics
-- [ ] Docker Compose one-command deployment
-- [ ] Fully offline — all assets local, no CDN dependencies
+(All requirements validated — milestone v1.0 complete)
 
 ### Out of Scope
 
@@ -65,10 +78,10 @@ Two conference attendees walk up, enter nicknames, and are playing within second
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| SQLite over PostgreSQL | Conference booth needs zero-config setup; no separate DB process in Docker | — Pending |
-| Vite over Create React App | Modern standard, faster builds, better developer experience | — Pending |
-| Docker Compose deployment | Single-command startup for booth staff with no technical background | — Pending |
-| Admin-driven reset flow | Booth staff controls pace to manage attendee queue | — Pending |
+| SQLite over PostgreSQL | Conference booth needs zero-config setup; no separate DB process in Docker | Validated — SQLite WAL mode, aiosqlite driver, zero issues across 5 phases |
+| Vite over Create React App | Modern standard, faster builds, better developer experience | Validated — Vite 6 + React 19, 473 modules, <2s build |
+| Docker Compose deployment | Single-command startup for booth staff with no technical background | Validated — `docker compose up --build` verified, audio files embedded in image |
+| Admin-driven reset flow | Booth staff controls pace to manage attendee queue | Validated — Admin panel with game control, question management, CSV import |
 
 ## Evolution
 
@@ -88,4 +101,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-28 after initialization*
+*Last updated: 2026-06-11 after Phase 5 completion (milestone v1.0)*
