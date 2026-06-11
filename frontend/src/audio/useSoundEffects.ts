@@ -18,8 +18,10 @@ export function useSoundEffects() {
       // Only play on decrement (not on round start when it resets to 10)
       if (state.remaining < prevState.remaining) {
         if (state.remaining > 3) {
+          soundManager.stop('tick')
           soundManager.play('tick')
         } else {
+          soundManager.stop('tick_fast')
           soundManager.play('tick_fast')
         }
       }
