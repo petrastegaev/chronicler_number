@@ -4,6 +4,7 @@ export type SoundName = 'tick' | 'tick_fast' | 'end_round' | 'winner'
 
 class SoundManager {
   private sounds: Map<SoundName, Howl> = new Map()
+  private soundIds: Map<SoundName, number> = new Map()
   private preloaded = false
 
   preload(): void {
@@ -33,23 +34,32 @@ class SoundManager {
     this.preloaded = true
   }
 
-  play(name: SoundName): void {
+  play(name: SoundName): number | undefined {
     const sound = this.sounds.get(name)
     if (!sound) {
       console.warn(`[Audio] Sound "${name}" not found`)
-      return
+      return undefined
     }
-    sound.play()
+    const id = sound.play()
+    this.soundIds.set(name, id)
+    return id
   }
 
   stopAll(): void {
     for (const sound of this.sounds.values()) {
       sound.stop()
     }
+    this.soundIds.clear()
   }
 
   stop(name: SoundName): void {
-    this.sounds.get(name)?.stop()
+    const sound = this.sounds.get(name)
+    const id = this.soundIds.get(name)
+    if (sound && id !== undefined) {
+      sound.stop(id)
+    } else {
+      sound?.stop()
+    }
   }
 }
 
