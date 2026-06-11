@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useGameStore } from '../stores/gameStore'
 import { useWebSocket } from '../hooks/useWebSocket'
+import { useSoundEffects } from '../audio/useSoundEffects'
 import JoinScreen from './JoinScreen'
 import WaitingScreen from './WaitingScreen'
 import PlayingScreen from './PlayingScreen'
@@ -14,6 +15,9 @@ export default function GameScreen() {
   const phase = useGameStore((s) => s.phase)
   const ws = useGameStore((s) => s.ws)
   const { connect } = useWebSocket()
+
+  // Mount sound effects hook -- starts preloading, subscribes to store
+  useSoundEffects()
 
   const showHeader = ['playing', 'showing_result', 'finished'].includes(phase)
 
