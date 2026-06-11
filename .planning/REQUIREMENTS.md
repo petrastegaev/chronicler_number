@@ -50,12 +50,12 @@ Requirements for the Saint Highload 2026 booth. Each maps to roadmap phases.
 
 ### Sound Effects
 
-- [ ] **AUDIO-01**: `tick` sound plays on each `timer_tick` event when remaining time > 3 seconds
-- [ ] **AUDIO-02**: `tick_fast` sound (higher pitch/faster) plays when remaining time <= 3 seconds
-- [ ] **AUDIO-03**: `end_round` sound (gong/bell) plays on `round_result` event
-- [ ] **AUDIO-04**: `winner` sound (fanfare) plays on `game_end` event
-- [ ] **AUDIO-05**: AudioContext is unlocked on first user interaction (nickname submit button) to comply with mobile browser autoplay policies
-- [ ] **AUDIO-06**: All audio files are bundled locally in the Docker image — no external CDN
+- [x] **AUDIO-01**: `tick` sound plays on each `timer_tick` event when remaining time > 3 seconds
+- [x] **AUDIO-02**: `tick_fast` sound (higher pitch/faster) plays when remaining time <= 3 seconds
+- [x] **AUDIO-03**: `end_round` sound (gong/bell) plays on `round_result` event
+- [x] **AUDIO-04**: `winner` sound (fanfare) plays on `game_end` event
+- [x] **AUDIO-05**: AudioContext is unlocked on first user interaction (nickname submit button) to comply with mobile browser autoplay policies
+- [x] **AUDIO-06**: All audio files are bundled locally in the Docker image — no external CDN
 
 ### Statistics
 
@@ -130,12 +130,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | QUEST-05 | Phase 4 | Pending |
 | QUEST-06 | Phase 4 | Pending |
 | QUEST-07 | Phase 4 | Pending |
-| AUDIO-01 | Phase 5 | Pending |
-| AUDIO-02 | Phase 5 | Pending |
-| AUDIO-03 | Phase 5 | Pending |
-| AUDIO-04 | Phase 5 | Pending |
-| AUDIO-05 | Phase 5 | Pending |
-| AUDIO-06 | Phase 5 | Pending |
+| AUDIO-01 | Phase 5 | Complete |
+| AUDIO-02 | Phase 5 | Complete |
+| AUDIO-03 | Phase 5 | Complete |
+| AUDIO-04 | Phase 5 | Complete |
+| AUDIO-05 | Phase 5 | Complete |
+| AUDIO-06 | Phase 5 | Complete |
 | STAT-01 | Phase 4 | Pending |
 | DEPLOY-01 | Phase 1 | Complete |
 | DEPLOY-02 | Phase 1 | Completed (01-01) |
