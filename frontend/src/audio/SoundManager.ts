@@ -6,6 +6,7 @@ class SoundManager {
   private sounds: Map<SoundName, Howl> = new Map()
   private soundIds: Map<SoundName, number> = new Map()
   private preloaded = false
+  private _errors: Set<SoundName> = new Set()
 
   preload(): void {
     if (this.preloaded) return
@@ -26,12 +27,21 @@ class SoundManager {
           volume: name === 'tick' || name === 'tick_fast' ? 0.5 : 1.0,
           onloaderror: (_id: number, error: unknown) => {
             console.warn(`[Audio] Failed to load ${name}:`, error)
+            this._errors.add(name)
           },
         })
       )
     }
 
     this.preloaded = true
+  }
+
+  get errors(): ReadonlySet<SoundName> {
+    return this._errors
+  }
+
+  hasError(name: SoundName): boolean {
+    return this._errors.has(name)
   }
 
   play(name: SoundName): number | undefined {
