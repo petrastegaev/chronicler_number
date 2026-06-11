@@ -1,0 +1,17 @@
+- generic [ref=e3]:
+  - banner [ref=e12]:
+    - generic [ref=e13]: Player2
+    - generic [ref=e14]: Дуэль чисел
+    - generic [ref=e15]:
+      - text: 0 ·
+      - generic [ref=e16]: Раунд 2 / 9
+  - generic [ref=e17]:
+    - paragraph [ref=e19]: Сколько дней в году?
+    - generic [ref=e20]:
+      - generic [ref=e22]:
+        - generic [ref=e23]:
+          - spinbutton [ref=e24]
+          - paragraph [ref=e25]: Введите целое число от 0 до 1 000 000
+        - button "Ответить" [ref=e26]
+      - timer "Осталось 8 секунд" [ref=e28]:
+        - generic [ref=e31]: "8"

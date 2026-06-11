@@ -1,3 +1,4 @@
+import asyncio
 import time
 import uuid
 
@@ -27,3 +28,17 @@ def restore_from_token(token: str) -> dict | None:
 def remove_token(token: str) -> None:
     """Remove a token from the store (e.g., on explicit disconnect)."""
     _reconnect_tokens.pop(token, None)
+
+
+async def cleanup_expired_tokens(interval: int = 300) -> None:
+    """Periodically scan and remove expired tokens to prevent unbounded memory growth.
+
+    Should be launched as a background task in the lifespan handler.
+    Runs every `interval` seconds (default: 5 minutes).
+    """
+    while True:
+        await asyncio.sleep(interval)
+        now = time.time()
+        expired = [k for k, v in _reconnect_tokens.items() if now - v["created_at"] > TOKEN_TTL]
+        for k in expired:
+            _reconnect_tokens.pop(k, None)

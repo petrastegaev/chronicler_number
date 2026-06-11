@@ -1,0 +1,12 @@
+- generic [ref=e3]:
+  - banner [ref=e12]:
+    - generic [ref=e13]: Player2
+    - generic [ref=e14]: Дуэль чисел
+    - generic [ref=e15]:
+      - text: 0 ·
+      - generic [ref=e16]: Раунд 8 / 9
+  - generic [ref=e91]:
+    - paragraph [ref=e92]: Ничья
+    - paragraph [ref=e93]: "Ваш ответ: —"
+    - paragraph [ref=e94]: "Правильный ответ: 3600"
+    - paragraph [ref=e95]: "Ответ соперника: —"

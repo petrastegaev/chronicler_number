@@ -1,6 +1,5 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useGameStore } from '../stores/gameStore'
-import { useWebSocket } from '../hooks/useWebSocket'
 
 export default function AnswerInput() {
   const myAnswer = useGameStore((s) => s.myAnswer)
@@ -10,29 +9,40 @@ export default function AnswerInput() {
   const remaining = useGameStore((s) => s.remaining)
   const phase = useGameStore((s) => s.phase)
   const ws = useGameStore((s) => s.ws)
-  const { submitAnswer } = useWebSocket()
+  const submitAnswerAction = useGameStore((s) => s.submitAnswerAction)
+  const currentRound = useGameStore((s) => s.currentRound)
+
+  // Guard against duplicate submissions within the same round
+  const lastSubmittedRoundRef = useRef<number | null>(null)
 
   const isDisabled = submittedAnswer || !ws
 
   const handleSubmit = useCallback(() => {
     if (isDisabled) return
     if (myAnswer === null) return // Don't submit empty answers
-    submitAnswer(myAnswer)
-    setSubmittedAnswer(true)
-  }, [isDisabled, myAnswer, submitAnswer, setSubmittedAnswer])
+    if (!Number.isFinite(myAnswer) || myAnswer < 0 || myAnswer > 1_000_000) return
+    // Prevent duplicate submissions in the same round
+    if (lastSubmittedRoundRef.current === currentRound) return
+    lastSubmittedRoundRef.current = currentRound
+    submitAnswerAction(myAnswer)
+  }, [isDisabled, myAnswer, currentRound, submitAnswerAction])
 
   // Auto-submit on timer expiry per D-10 with Pitfall 4 mitigation
   useEffect(() => {
     if (remaining === 0 && !submittedAnswer && phase === 'playing' && ws) {
-      if (myAnswer === null) {
-        // Don't submit empty/null answers — the player chose not to answer
-        setSubmittedAnswer(true)
+      if (myAnswer === null || !Number.isFinite(myAnswer) || myAnswer < 0 || myAnswer > 1_000_000) {
+        // Don't submit empty/invalid answers — the player chose not to answer
+        if (lastSubmittedRoundRef.current !== currentRound) {
+          lastSubmittedRoundRef.current = currentRound
+          setSubmittedAnswer(true)
+        }
         return
       }
-      submitAnswer(myAnswer)
-      setSubmittedAnswer(true)
+      if (lastSubmittedRoundRef.current === currentRound) return
+      lastSubmittedRoundRef.current = currentRound
+      submitAnswerAction(myAnswer)
     }
-  }, [remaining, myAnswer, submittedAnswer, phase, ws, submitAnswer, setSubmittedAnswer])
+  }, [remaining, myAnswer, submittedAnswer, phase, ws, currentRound, submitAnswerAction, setSubmittedAnswer])
 
   return (
     <div className="flex flex-col items-center gap-3">
@@ -43,7 +53,13 @@ export default function AnswerInput() {
           max={1000000}
           value={myAnswer ?? ''}
           onChange={(e) => {
-            const val = e.target.value === '' ? null : Number(e.target.value)
+            if (e.target.value === '') {
+              setMyAnswer(null)
+              return
+            }
+            const val = Number(e.target.value)
+            // Reject NaN and Infinity from intermediate typing states (e.g. '.', '-', 'e')
+            if (!Number.isFinite(val)) return
             setMyAnswer(val)
           }}
           disabled={isDisabled}

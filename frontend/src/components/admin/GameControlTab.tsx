@@ -1,40 +1,41 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useState } from 'react'
 import { useAdminStore } from '../../stores/adminStore'
 import { useAdminWebSocket } from '../../hooks/useAdminWebSocket'
 import GameStats from './GameStats'
 import PlayerSlot from './PlayerSlot'
 
 export default function GameControlTab() {
-  const { connect, startGame, restart } = useAdminWebSocket()
+  const { startGame, restart } = useAdminWebSocket()
+  const [startingGame, setStartingGame] = useState(false)
 
   const phase = useAdminStore((s) => s.phase)
   const player1Nickname = useAdminStore((s) => s.player1Nickname)
   const player2Nickname = useAdminStore((s) => s.player2Nickname)
+  const player1Online = useAdminStore((s) => s.player1Online)
+  const player2Online = useAdminStore((s) => s.player2Online)
   const player1Score = useAdminStore((s) => s.player1Score)
   const player2Score = useAdminStore((s) => s.player2Score)
   const currentRound = useAdminStore((s) => s.currentRound)
   const totalRounds = useAdminStore((s) => s.totalRounds)
   const totalQuestions = useAdminStore((s) => s.totalQuestions)
 
-  const connectedRef = useRef(false)
-
-  // Connect WebSocket once on mount
-  useEffect(() => {
-    if (connectedRef.current) return
-    connectedRef.current = true
-    connect()
-  }, [connect])
-
-  // Game count fetched by <GameStats /> component
-
-  // Derive online status: a player is online when their nickname is non-empty
-  const player1Online = player1Nickname.length > 0
-  const player2Online = player2Nickname.length > 0
+  // Reset startingGame when phase changes to playing (server confirmed start)
+  if (startingGame && phase === 'playing') {
+    setStartingGame(false)
+  }
 
   const canStartGame =
+    player1Online &&
+    player2Online &&
     player1Nickname.length > 0 &&
     player2Nickname.length > 0 &&
     totalQuestions >= 9
+
+  const handleStartGame = useCallback(() => {
+    if (startingGame || !canStartGame) return
+    setStartingGame(true)
+    startGame()
+  }, [startingGame, canStartGame, startGame])
 
   return (
     <div className="flex flex-col gap-4 px-4 pt-6">
@@ -113,11 +114,11 @@ export default function GameControlTab() {
       {phase === 'lobby' && (
         <button
           type="button"
-          onClick={startGame}
-          disabled={!canStartGame}
+          onClick={handleStartGame}
+          disabled={!canStartGame || startingGame}
           className="flex min-h-[48px] w-full items-center justify-center rounded-xl bg-player1 px-6 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Запустить игру
+          {startingGame ? 'Запуск...' : 'Запустить игру'}
         </button>
       )}
       {phase === 'finished' && (

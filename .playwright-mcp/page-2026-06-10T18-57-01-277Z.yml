@@ -1,0 +1,17 @@
+- generic [ref=e3]:
+  - banner [ref=e12]:
+    - generic [ref=e13]: Player2
+    - generic [ref=e14]: Дуэль чисел
+    - generic [ref=e15]:
+      - text: 0 ·
+      - generic [ref=e16]: Раунд 9 / 9
+  - generic [ref=e100]:
+    - paragraph [ref=e102]: Сколько граней у кубика Рубика?
+    - generic [ref=e103]:
+      - generic [ref=e105]:
+        - generic [ref=e106]:
+          - spinbutton [ref=e107]
+          - paragraph [ref=e108]: Введите целое число от 0 до 1 000 000
+        - button "Ответить" [ref=e109]
+      - timer "Осталось 5 секунд" [ref=e111]:
+        - generic [ref=e114]: "5"

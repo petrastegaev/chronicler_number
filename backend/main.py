@@ -1,5 +1,6 @@
 import asyncio
 import os
+import pathlib
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -13,36 +14,51 @@ from routers import questions as questions_router
 from routers import stats as stats_router
 from typing import Optional
 
+from auth import ADMIN_KEY
 from game.session import GameSession
-from game.tokens import generate_token, remove_token, restore_from_token
+from game.tokens import cleanup_expired_tokens, generate_token, remove_token, restore_from_token
 from services.question_service import QuestionService
 
-ADMIN_KEY = os.environ.get("ADMIN_KEY", "booth-admin-2026")
+# Resolve absolute database path relative to this file, and ensure data directory exists
+_DB_DIR = pathlib.Path(__file__).resolve().parent.parent / 'data'
+_DB_DIR.mkdir(parents=True, exist_ok=True)
+_DATABASE_URL = f'sqlite+aiosqlite:///{_DB_DIR / "game.db"}'
 
 manager = ConnectionManager()
 active_session: Optional[GameSession] = None
 game_task: Optional[asyncio.Task] = None
+game_lock = asyncio.Lock()  # Guards against double-start race (SEC-04, BUG-04)
 
 
 async def reset_game():
     """Destroy active session, cancel game task, broadcast reset, return to lobby."""
     global active_session, game_task
-    if active_session is None or active_session.state in ("waiting_for_players",):
-        return
-    if game_task is not None and not game_task.done():
-        game_task.cancel()
-        game_task = None
-    active_session = None
-    await manager.broadcast({
-        "event": "game_reset",
-        "data": {"message": "Game has been reset by admin"}
-    })
+    async with game_lock:
+        if active_session is None or active_session.state in ("waiting_for_players",):
+            return
+        if game_task is not None and not game_task.done():
+            # Broadcast cancellation before killing the task
+            await manager.broadcast({
+                "event": "game_cancelled",
+                "data": {"message": "Игра отменена администратором"}
+            })
+            game_task.cancel()
+            try:
+                await game_task
+            except asyncio.CancelledError:
+                pass
+            game_task = None
+        active_session = None
+        await manager.broadcast({
+            "event": "game_reset",
+            "data": {"message": "Игра сброшена. Можно начинать заново."}
+        })
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # --- STARTUP ---
-    engine = create_async_engine("sqlite+aiosqlite:///data/game.db", echo=False)
+    engine = create_async_engine(_DATABASE_URL, echo=False)
 
     @event.listens_for(engine.sync_engine, "connect")
     def set_sqlite_pragma(dbapi_connection, connection_record):
@@ -59,9 +75,18 @@ async def lifespan(app: FastAPI):
         await conn.run_sync(Base.metadata.create_all)
 
     app.state.engine = engine
+
+    # Start periodic token cleanup to prevent unbounded memory growth
+    token_cleanup_task = asyncio.create_task(cleanup_expired_tokens())
+
     yield
 
     # --- SHUTDOWN ---
+    token_cleanup_task.cancel()
+    try:
+        await token_cleanup_task
+    except asyncio.CancelledError:
+        pass
     await engine.dispose()
 
 
@@ -178,6 +203,14 @@ async def websocket_endpoint(websocket: WebSocket):
                     "data": {"role": "admin", "token": token}
                 })
             elif role == "player":
+                # Validate nickname (BUG-09: enforce 1-15 char limit)
+                if not nickname or len(nickname.strip()) < 1 or len(nickname) > 15:
+                    await websocket.send_json({
+                        "event": "error",
+                        "data": {"message": "Никнейм должен быть от 1 до 15 символов"}
+                    })
+                    await websocket.close()
+                    return
                 if manager.player_count >= 2:
                     await websocket.send_json({
                         "event": "error",
@@ -240,20 +273,35 @@ async def websocket_endpoint(websocket: WebSocket):
             elif websocket == manager.admin:
                 if event == "start_game":
                     if manager.player1_nickname and manager.player2_nickname:
-                        # Guard: check game_task lifecycle to prevent double-session race
-                        if game_task is not None and not game_task.done():
-                            continue
-                        async with app.state.session_factory() as db:
-                            questions = await QuestionService.random_selection(db, 9)
-                        if len(questions) < 9:
-                            await websocket.send_json({
-                                "event": "error",
-                                "data": {"message": "Недостаточно вопросов. Нужно минимум 9."}
-                            })
-                            continue
-                        active_session = GameSession(manager, app.state.session_factory)
-                        game_task = asyncio.create_task(active_session.run(questions))
-                        active_session.start_event.set()
+                        async with game_lock:
+                            # Double-check under lock (BUG-04)
+                            if game_task is not None and not game_task.done():
+                                continue
+                            async with app.state.session_factory() as db:
+                                questions = await QuestionService.random_selection(db, 9)
+                            if len(questions) < 9:
+                                await websocket.send_json({
+                                    "event": "error",
+                                    "data": {"message": "Недостаточно вопросов. Нужно минимум 9."}
+                                })
+                                continue
+                            active_session = GameSession(manager, app.state.session_factory)
+
+                            async def _run_with_error_handler():
+                                try:
+                                    await active_session.run(questions)
+                                except asyncio.CancelledError:
+                                    pass  # Normal cancellation
+                                except Exception as e:
+                                    import traceback
+                                    traceback.print_exc()
+                                    await manager.broadcast({
+                                        "event": "error",
+                                        "data": {"message": f"Критическая ошибка игры: {e}"}
+                                    })
+
+                            game_task = asyncio.create_task(_run_with_error_handler())
+                            active_session.start_event.set()
                 elif event == "restart":
                     await reset_game()
 
@@ -271,7 +319,16 @@ async def websocket_endpoint(websocket: WebSocket):
         elif manager.admin == websocket:
             manager.admin = None
             if game_task is not None and not game_task.done():
+                # Broadcast cancellation before killing the game (BUG-05)
+                await manager.send_to_players({
+                    "event": "game_cancelled",
+                    "data": {"message": "Администратор отключился. Игра завершена."}
+                })
                 game_task.cancel()
+                try:
+                    await game_task
+                except asyncio.CancelledError:
+                    pass
                 game_task = None
                 active_session = None
 

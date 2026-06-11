@@ -24,6 +24,7 @@ interface AdminState {
   totalQuestions: number
   csvResult: { added: number; errors: string[] } | null
   token: string | null
+  adminKey: string | null
 }
 
 interface AdminActions {
@@ -43,6 +44,7 @@ interface AdminActions {
   setCsvResult: (result: { added: number; errors: string[] } | null) => void
   clearCsvResult: () => void
   setToken: (token: string | null) => void
+  setAdminKey: (key: string | null) => void
   setGameStarted: (p1Nickname: string, p2Nickname: string) => void
   setScoreUpdate: (p1Score: number, p2Score: number) => void
   resetForRestart: () => void
@@ -52,7 +54,7 @@ interface AdminActions {
 type AdminStore = AdminState & AdminActions
 
 const initialState: AdminState = {
-  phase: 'connecting',
+  phase: 'waiting',
   player1Nickname: '',
   player2Nickname: '',
   player1Online: false,
@@ -67,6 +69,7 @@ const initialState: AdminState = {
   totalQuestions: 0,
   csvResult: null,
   token: null,
+  adminKey: null,
 }
 
 export const useAdminStore = create<AdminStore>((set) => ({
@@ -88,6 +91,7 @@ export const useAdminStore = create<AdminStore>((set) => ({
   setCsvResult: (result) => set({ csvResult: result }),
   clearCsvResult: () => set({ csvResult: null }),
   setToken: (token) => set({ token }),
+  setAdminKey: (key) => set({ adminKey: key }),
 
   setGameStarted: (p1Nickname, p2Nickname) =>
     set({
@@ -110,7 +114,10 @@ export const useAdminStore = create<AdminStore>((set) => ({
       player1Score: 0,
       player2Score: 0,
       currentRound: 0,
-      // Keep nicknames (Pitfall 1 in RESEARCH.md)
+      player1Online: false,
+      player2Online: false,
+      // Keep nicknames for rejoin convenience (Pitfall 1 in RESEARCH.md)
+      // Online booleans reset — players must reconnect to be marked Ready
     }),
 
   reset: () => set(initialState),

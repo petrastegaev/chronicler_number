@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'motion/react'
 import { useCallback, useRef, useState } from 'react'
 import { useAdminStore } from '../../stores/adminStore'
+import { apiFetch } from '../../hooks/apiFetch'
 
 interface PreviewRow {
   text: string
@@ -72,7 +73,7 @@ export default function CsvImportTab() {
           parts.push(current)
           return parts
         }
-        const lines = text.split('\n').filter((line) => line.trim())
+        const lines = text.split(/\r?\n/).filter((line) => line.trim())
         const parsed = lines.slice(0, 5).map((line) => {
           const parts = parseCsvLine(line)
           return {
@@ -101,7 +102,7 @@ export default function CsvImportTab() {
     try {
       const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:'
       const host = window.location.host
-      const res = await fetch(`${protocol}//${host}/api/questions/upload-csv`, {
+      const res = await apiFetch(`${protocol}//${host}/api/questions/upload-csv`, {
         method: 'POST',
         body: formData,
       })
@@ -112,7 +113,7 @@ export default function CsvImportTab() {
 
       // Refresh question list after successful upload
       if (data.added > 0) {
-        const listRes = await fetch(`${protocol}//${host}/api/questions/?skip=0&limit=20`)
+        const listRes = await apiFetch(`${protocol}//${host}/api/questions/?skip=0&limit=20`)
         if (listRes.ok) {
           const listData = await listRes.json()
           setQuestions(listData.items)

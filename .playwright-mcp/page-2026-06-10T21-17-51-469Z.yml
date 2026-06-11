@@ -1,0 +1,18 @@
+- main [ref=e3]:
+  - generic [ref=e43]:
+    - generic [ref=e44]:
+      - button "Список (37)" [ref=e272] [cursor=pointer]
+      - button "Добавить" [ref=e46] [cursor=pointer]
+      - button "CSV" [ref=e47] [cursor=pointer]
+    - generic [ref=e274]:
+      - generic [ref=e275]:
+        - img [ref=e276]
+        - generic [ref=e278]: "Успешно добавлено: 6"
+      - button "Добавить ещё" [ref=e279]
+  - navigation [ref=e26]:
+    - button "Игра" [ref=e27]:
+      - img [ref=e28]
+      - generic [ref=e31]: Игра
+    - button "Вопросы" [ref=e32]:
+      - img [ref=e33]
+      - generic [ref=e36]: Вопросы

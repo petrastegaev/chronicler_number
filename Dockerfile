@@ -19,9 +19,10 @@ COPY --from=frontend-build /app/dist ./static
 # Create data directory for SQLite
 RUN mkdir -p /app/data
 
-# Non-root user for security
-RUN adduser --disabled-password appuser && chown -R appuser /app
+# Non-root user for security — only chown the writable data directory
+RUN adduser --disabled-password --gecos '' appuser && chown appuser /app/data
 USER appuser
 
 EXPOSE 8000
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/stats/')"
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--graceful-timeout", "5"]

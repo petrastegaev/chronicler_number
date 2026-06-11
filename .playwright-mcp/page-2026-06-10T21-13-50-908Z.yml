@@ -1,0 +1,20 @@
+- main [ref=e3]:
+  - generic [ref=e6]:
+    - generic [ref=e7]:
+      - heading "Дуэль чисел" [level=2] [ref=e8]
+      - paragraph [ref=e9]: Панель ведущего
+    - generic [ref=e10]:
+      - generic [ref=e11]:
+        - generic [ref=e14]: Игрок 1
+        - generic [ref=e17]: Нет подключения
+      - generic [ref=e18]:
+        - generic [ref=e21]: Игрок 2
+        - generic [ref=e24]: Нет подключения
+    - paragraph [ref=e25]: "Сыграно игр: 0"
+  - navigation [ref=e26]:
+    - button "Игра" [ref=e27]:
+      - img [ref=e28]
+      - generic [ref=e31]: Игра
+    - button "Вопросы" [ref=e32]:
+      - img [ref=e33]
+      - generic [ref=e36]: Вопросы
