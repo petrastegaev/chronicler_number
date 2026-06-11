@@ -16,7 +16,7 @@ export function useSoundEffects() {
   useEffect(() => {
     const unsub = useGameStore.subscribe((state, prevState) => {
       // Only play on decrement (not on round start when it resets to 10)
-      if (state.remaining < prevState.remaining) {
+      if (state.remaining < prevState.remaining && state.remaining > 0) {
         if (state.remaining > 3) {
           soundManager.stop('tick')
           soundManager.play('tick')
