@@ -15,7 +15,8 @@ playwright-report/
 test-results/
 .playwright-mcp/
 
-# IDE
+# IDE / Claude
+.claude/
 .idea/
 *.swp
 *.swo
