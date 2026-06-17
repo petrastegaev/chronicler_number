@@ -1,5 +1,0 @@
-- generic [ref=e4]:
-  - heading "Дуэль чисел" [level=1] [ref=e5]
-  - generic [ref=e6]:
-    - textbox "Введите ваш ник" [ref=e7]: Player1
-    - button "Присоединиться" [active] [ref=e8]
