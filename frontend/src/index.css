@@ -1,39 +1,32 @@
 @import "tailwindcss";
 
 @font-face {
-  font-family: 'Inter';
-  src: url('/fonts/Inter-Regular.woff2') format('woff2');
+  font-family: 'CoFo Sans Pixel';
+  src: url('/fonts/CoFoSansPixel.otf') format('opentype');
   font-weight: 400;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'Inter';
-  src: url('/fonts/Inter-SemiBold.woff2') format('woff2');
-  font-weight: 600;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Inter';
-  src: url('/fonts/Inter-Bold.woff2') format('woff2');
-  font-weight: 700;
+  font-family: 'CoFo Sans Regular';
+  src: url('/fonts/CoFoSansRegular.otf') format('opentype');
+  font-weight: 400;
   font-style: normal;
 }
 
 @theme {
-  --color-wb-bg: #1a0a2e;
-  --color-wb-surface: #2d1b4e;
-  --color-wb-text: #eeeeee;
-  --color-wb-text-muted: #9ca3af;
-  --color-player1: #3B82F6;
-  --color-player1-light: #60a5fa;
-  --color-player2: #EF4444;
-  --color-player2-light: #f87171;
-  --color-correct: #10B981;
+  --color-wb-bg: #161616;
+  --color-wb-surface: #2a2a2a;
+  --color-wb-text: #d5ccde;
+  --color-wb-text-muted: #8a7a9a;
+  --color-player1: #7f30e3;
+  --color-player1-light: #a060f0;
+  --color-player2: #ff00fe;
+  --color-player2-light: #ff50fe;
+  --color-correct: #40f99b;
   --color-warning: #F59E0B;
-  --color-danger: #EF4444;
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --color-danger: #ff3333;
+  --font-sans: 'CoFo Sans Pixel', 'CoFo Sans Regular', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
 

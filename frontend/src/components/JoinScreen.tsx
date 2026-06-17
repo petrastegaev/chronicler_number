@@ -1,20 +1,19 @@
 import { useCallback, useState } from 'react'
 import { motion } from 'motion/react'
 import { useGameStore } from '../stores/gameStore'
-import { useWebSocket } from '../hooks/useWebSocket'
 
 export default function JoinScreen() {
   const [nickname, setNickname] = useState('')
   const phase = useGameStore((s) => s.phase)
-  const { join } = useWebSocket()
+  const joinGame = useGameStore((s) => s.joinGame)
 
   const isSubmitting = phase === 'joining'
 
   const handleJoin = useCallback(() => {
     const trimmed = nickname.trim()
     if (!trimmed || isSubmitting) return
-    join(trimmed)
-  }, [nickname, isSubmitting, join])
+    joinGame(trimmed)
+  }, [nickname, isSubmitting, joinGame])
 
   return (
     <motion.div
@@ -25,7 +24,7 @@ export default function JoinScreen() {
       transition={{ duration: 0.3 }}
     >
       <h1 className="text-[64px] font-semibold leading-[1.0] text-wb-text">
-        Дуэль чисел
+        Число летописца
       </h1>
       <div className="mt-8 w-full max-w-[400px] rounded-xl bg-wb-surface p-6">
         <input

@@ -20,7 +20,7 @@ export default function GameHeader() {
       <span className={`text-base font-regular ${playerAccentClass}`}>
         {ownNickname}
       </span>
-      <span className="text-base font-regular text-wb-text-muted">Дуэль чисел</span>
+      <span className="text-base font-regular text-wb-text-muted">Число летописца</span>
       <span className="text-base font-regular text-wb-text-muted">
         <span className={`text-xl font-semibold leading-[1.3] ${playerAccentClass}`}>
           {ownScore}

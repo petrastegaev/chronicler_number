@@ -17,7 +17,7 @@ export default function WaitingScreen() {
       transition={{ duration: 0.3 }}
     >
       <h1 className="text-[64px] font-semibold leading-[1.0] text-wb-text">
-        Дуэль чисел
+        Число летописца
       </h1>
       <p className="mt-8 text-xl leading-[1.3] text-wb-text-muted">
         {waitingText}

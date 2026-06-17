@@ -57,7 +57,7 @@ export default function TimerRing() {
         dominantBaseline="central"
         fill="var(--color-wb-text)"
         fontSize="64"
-        fontFamily="Inter, sans-serif"
+        fontFamily="'CoFo Sans Pixel', system-ui, sans-serif"
         fontWeight="600"
       >
         {remaining}

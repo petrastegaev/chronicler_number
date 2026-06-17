@@ -1,6 +1,7 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useAdminStore } from '../../stores/adminStore'
 import { useAdminWebSocket } from '../../hooks/useAdminWebSocket'
+import { apiFetch } from '../../hooks/apiFetch'
 import GameStats from './GameStats'
 import PlayerSlot from './PlayerSlot'
 
@@ -18,6 +19,23 @@ export default function GameControlTab() {
   const currentRound = useAdminStore((s) => s.currentRound)
   const totalRounds = useAdminStore((s) => s.totalRounds)
   const totalQuestions = useAdminStore((s) => s.totalQuestions)
+  const setTotalQuestions = useAdminStore((s) => s.setTotalQuestions)
+
+  // Fetch question count when Game tab mounts or phase changes to lobby
+  useEffect(() => {
+    if (phase === 'lobby' || phase === 'playing') {
+      const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:'
+      const host = window.location.host
+      apiFetch(`${protocol}//${host}/api/questions/?limit=1`)
+        .then((res) => res.json())
+        .then((data) => {
+          setTotalQuestions(data.total)
+        })
+        .catch(() => {
+          // Silently keep current totalQuestions
+        })
+    }
+  }, [phase, setTotalQuestions])
 
   // Reset startingGame when phase changes to playing (server confirmed start)
   if (startingGame && phase === 'playing') {
@@ -41,7 +59,7 @@ export default function GameControlTab() {
     <div className="flex flex-col gap-4 px-4 pt-6">
       {/* Header */}
       <div className="text-center">
-        <h2 className="text-lg font-semibold text-wb-text">Дуэль чисел</h2>
+        <h2 className="text-lg font-semibold text-wb-text">Число летописца</h2>
         <p className="text-sm text-wb-text-muted">Панель ведущего</p>
       </div>
 

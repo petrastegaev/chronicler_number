@@ -34,7 +34,7 @@ export default function ResultOverlay() {
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(26,10,46,0.85)]"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(22,22,22,0.85)]"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
