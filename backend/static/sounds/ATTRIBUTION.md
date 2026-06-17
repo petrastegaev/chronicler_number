@@ -1,6 +1,6 @@
 # Audio File Attribution
 
-All sound files in this directory were generated programmatically for the "Число летописца" (Number Duel) game.
+All sound files in this directory were generated programmatically for the "Дуэль чисел" (Number Duel) game.
 
 ## Generation Method
 

@@ -458,7 +458,7 @@ async function runTests() {
       if (resp.ok) soundsOk++;
     }
     // Проверяем шрифты тоже
-    const fontResp = await fetch(`${BASE_URL}/fonts/CoFoSans-Regular.woff2`).catch(() => ({ ok: false }));
+    const fontResp = await fetch(`${BASE_URL}/fonts/CoFoSansRegular.otf`).catch(() => ({ ok: false }));
     const fontsOk = fontResp.ok;
 
     report('SOUND-006: Ассеты', (soundsOk === 4 && fontsOk) ? 'PASS' : 'FAIL',

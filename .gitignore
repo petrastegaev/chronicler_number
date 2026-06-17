@@ -23,8 +23,11 @@ test-results/
 # Temp files
 *.png
 *.jpg
-*.yml
 *.zip
 *.pdf
 !frontend/src/assets/
+!frontend/src/assets/**
 __MACOSX/
+
+# Playwright MCP snapshots (generated, not committed)
+.playwright-mcp/*.yml

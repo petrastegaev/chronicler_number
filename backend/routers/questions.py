@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth import verify_admin_key
@@ -48,14 +49,13 @@ async def delete_question(question_id: int, db: AsyncSession = Depends(get_db), 
         if not deleted:
             raise HTTPException(status_code=404, detail="Question not found")
         await db.commit()
-    except Exception as e:
-        # BUG-08: FK constraint violation when question is referenced by Round records
-        if "FOREIGN KEY" in str(e).upper() or "integrity" in str(e).lower():
-            raise HTTPException(
-                status_code=409,
-                detail="Невозможно удалить вопрос: он используется в истории игр",
-            )
-        raise
+    except IntegrityError:
+        # FK constraint violation — question is referenced by Round records
+        await db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="Невозможно удалить вопрос: он используется в истории игр",
+        )
 
 
 MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB

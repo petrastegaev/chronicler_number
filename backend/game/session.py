@@ -3,7 +3,7 @@ import time
 from datetime import datetime, timezone
 from typing import Optional
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from connection_manager import ConnectionManager
 from models import GameSession as GameSessionModel, Round, Stat
@@ -215,7 +215,6 @@ class GameSession:
 
                 # BUG-06: Use atomic UPDATE to avoid read-then-write race.
                 # INSERT the Stat row if it doesn't exist (first run).
-                from sqlalchemy import update
                 stat = await db.execute(select(Stat).limit(1))
                 stat_record = stat.scalar_one_or_none()
                 if stat_record is None:
