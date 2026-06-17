@@ -9,3 +9,22 @@ backend/static/
 data/
 .DS_Store
 *.tsbuildinfo
+
+# Playwright
+playwright-report/
+test-results/
+.playwright-mcp/
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# Temp files
+*.png
+*.jpg
+*.yml
+*.zip
+*.pdf
+!frontend/src/assets/
+__MACOSX/

@@ -46,10 +46,24 @@ export function useAdminWebSocket() {
 
     switch (msg.event) {
       case 'joined': {
-        const data = msg.data as { role?: string; token?: string }
+        const data = msg.data as {
+          role?: string
+          token?: string
+          player1_nickname?: string | null
+          player2_nickname?: string | null
+        }
         store.setPhase('lobby')
         if (data.token) {
           store.setToken(data.token)
+        }
+        // Apply existing player state (admin connected after players)
+        if (data.player1_nickname) {
+          store.setPlayer1Nickname(data.player1_nickname)
+          store.setPlayer1Online(true)
+        }
+        if (data.player2_nickname) {
+          store.setPlayer2Nickname(data.player2_nickname)
+          store.setPlayer2Online(true)
         }
         break
       }
@@ -93,8 +107,10 @@ export function useAdminWebSocket() {
         }
         if (data.player_number === 1) {
           store.setPlayer1Nickname(data.nickname)
+          store.setPlayer1Online(true)
         } else if (data.player_number === 2) {
           store.setPlayer2Nickname(data.nickname)
+          store.setPlayer2Online(true)
         }
         if (data.player1_nickname) store.setPlayer1Nickname(data.player1_nickname)
         if (data.player2_nickname) store.setPlayer2Nickname(data.player2_nickname)

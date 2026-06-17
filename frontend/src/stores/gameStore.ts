@@ -35,6 +35,9 @@ interface GameActions {
   setRoundResultData: (data: RoundResultEvent['data']) => void
   setGameEndResultData: (data: GameEndEvent['data']) => void
   setOpponentNickname: (name: string) => void
+  // WebSocket actions (available without useWebSocket hook)
+  joinGame: (nickname: string) => void
+  submitAnswerAction: (answer: number | null) => void
 }
 
 type GameStore = GameState & GameActions
@@ -58,7 +61,7 @@ export const initialState: GameState = {
   gameEndResult: null,
 }
 
-export const useGameStore = create<GameStore>((set) => ({
+export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
 
   setPhase: (phase) => set({ phase }),
@@ -105,4 +108,29 @@ export const useGameStore = create<GameStore>((set) => ({
       phase: 'finished',
     }),
   setOpponentNickname: (name) => set({ player2Nickname: name }),
+
+  joinGame: (nickname) => {
+    const state = get()
+    state.setPhase('joining')
+    state.ws?.send(
+      JSON.stringify({
+        event: 'join',
+        data: { role: 'player', nickname },
+      })
+    )
+  },
+
+  submitAnswerAction: (answer) => {
+    const state = get()
+    if (state.submittedAnswer) return
+    if (answer === null) return
+    if (state.phase !== 'playing') return
+    set({ submittedAnswer: true })
+    state.ws?.send(
+      JSON.stringify({
+        event: 'submit_answer',
+        data: { answer },
+      })
+    )
+  },
 }))

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useAdminStore } from '../../stores/adminStore'
+import { apiFetch } from '../../hooks/apiFetch'
 import ConfirmDialog from './ConfirmDialog'
 import Toast from './Toast'
 
@@ -31,7 +32,7 @@ export default function QuestionListTab() {
       try {
         const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:'
         const host = window.location.host
-        const res = await fetch(
+        const res = await apiFetch(
           `${protocol}//${host}/api/questions/?skip=${pageNum * 20}&limit=20`,
         )
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -58,7 +59,7 @@ export default function QuestionListTab() {
     try {
       const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:'
       const host = window.location.host
-      const res = await fetch(`${protocol}//${host}/api/questions/${target.id}`, {
+      const res = await apiFetch(`${protocol}//${host}/api/questions/${target.id}`, {
         method: 'DELETE',
       })
       if (res.status !== 204) throw new Error(`HTTP ${res.status}`)

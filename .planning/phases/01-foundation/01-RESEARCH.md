@@ -801,17 +801,17 @@ services:
 
 **If this table is empty:** All claims in this research were verified or cited -- no user confirmation needed.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Python version mismatch (3.12.6 installed, 3.13.13 recommended)**
    - What we know: The local development environment has Python 3.12.6, while the stack recommends 3.13.13. Docker image is `python:3.13-slim` -- so the Docker build uses 3.13.x regardless.
    - What's unclear: Will development without pyenv/venv targeting 3.13 cause issues? FastAPI 0.136.x and SQLAlchemy 2.0.x work on both 3.12 and 3.13. The `python:3.12-slim` base image is a fallback if 3.13 slim has issues.
-   - Recommendation: Use Docker for primary testing. For local dev without Docker, use a `.python-version` file or pyenv to match 3.13.x. If that's not practical, pin Docker to `python:3.13-slim` and develop locally on 3.12 (no breaking differences expected for this stack).
+   - RESOLVED: Use Docker for primary testing. For local dev without Docker, use a `.python-version` file or pyenv to match 3.13.x. If that's not practical, pin Docker to `python:3.13-slim` and develop locally on 3.12 (no breaking differences expected for this stack).
 
 2. **Tailwind CSS v4 postcss vs vite plugin**
    - What we know: In Phase 1 the Vite plugin works fine. But there may be edge cases with CSS `@import` ordering and `@theme` directives.
    - What's unclear: Whether the placeholder pages need any complex Tailwind patterns or just basic utility classes.
-   - Recommendation: Phase 1 placeholder pages use only basic Tailwind classes (flex, grid, text, colors). Complex `@theme` customization can wait until Phase 3/4.
+   - RESOLVED: Phase 1 placeholder pages use only basic Tailwind classes (flex, grid, text, colors). Complex `@theme` customization can wait until Phase 3/4.
 
 ## Environment Availability
 

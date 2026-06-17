@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useAdminStore } from '../../stores/adminStore'
+import { apiFetch } from '../../hooks/apiFetch'
 
 export default function GameStats() {
   const [gameCount, setGameCount] = useState(0)
@@ -8,7 +9,7 @@ export default function GameStats() {
   useEffect(() => {
     const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:'
     const host = window.location.host
-    fetch(`${protocol}//${host}/api/stats/`)
+    apiFetch(`${protocol}//${host}/api/stats/`)
       .then((res) => res.json())
       .then((data) => {
         setGameCount(data.game_count)

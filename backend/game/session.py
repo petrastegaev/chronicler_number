@@ -189,32 +189,45 @@ class GameSession:
     async def _persist_game(self, winner_nickname: str | None):
         """Persist game results to SQLite. Wrapped in shield to survive task cancellation."""
         async with self.session_factory() as db:
-            game_session = GameSessionModel(
-                player1_nickname=self.manager.player1_nickname or "",
-                player2_nickname=self.manager.player2_nickname or "",
-                player1_score=self.p1_score,
-                player2_score=self.p2_score,
-                winner_nickname=winner_nickname,
-                ended_at=datetime.now(timezone.utc),
-            )
-            db.add(game_session)
-            await db.flush()
-
-            for r in self.round_results:
-                q = self.questions[r["round_number"] - 1]
-                round_record = Round(
-                    game_session_id=game_session.id,
-                    question_id=q.id,
-                    round_number=r["round_number"],
-                    player1_answer=r["player1_answer"],
-                    player2_answer=r["player2_answer"],
-                    winner={"player1": 1, "player2": 2, "draw": None}.get(r["winner"]),
+            try:
+                game_session = GameSessionModel(
+                    player1_nickname=self.manager.player1_nickname or "",
+                    player2_nickname=self.manager.player2_nickname or "",
+                    player1_score=self.p1_score,
+                    player2_score=self.p2_score,
+                    winner_nickname=winner_nickname,
+                    ended_at=datetime.now(timezone.utc),
                 )
-                db.add(round_record)
+                db.add(game_session)
+                await db.flush()
 
-            stat = await db.execute(select(Stat).limit(1))
-            stat_record = stat.scalar_one_or_none()
-            if stat_record:
-                stat_record.game_count += 1
+                for r in self.round_results:
+                    q = self.questions[r["round_number"] - 1]
+                    round_record = Round(
+                        game_session_id=game_session.id,
+                        question_id=q.id,
+                        round_number=r["round_number"],
+                        player1_answer=r["player1_answer"],
+                        player2_answer=r["player2_answer"],
+                        winner={"player1": 1, "player2": 2, "draw": None}.get(r["winner"]),
+                    )
+                    db.add(round_record)
 
-            await db.commit()
+                # BUG-06: Use atomic UPDATE to avoid read-then-write race.
+                # INSERT the Stat row if it doesn't exist (first run).
+                from sqlalchemy import update
+                stat = await db.execute(select(Stat).limit(1))
+                stat_record = stat.scalar_one_or_none()
+                if stat_record is None:
+                    db.add(Stat(game_count=1))
+                else:
+                    await db.execute(
+                        update(Stat).where(Stat.id == stat_record.id).values(
+                            game_count=Stat.game_count + 1
+                        )
+                    )
+
+                await db.commit()
+            except Exception:
+                await db.rollback()
+                raise

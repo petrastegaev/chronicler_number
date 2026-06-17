@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useAdminStore } from '../../stores/adminStore'
+import { apiFetch } from '../../hooks/apiFetch'
 import Toast from './Toast'
 
 interface Question {
@@ -26,7 +27,7 @@ export default function QuestionAddTab() {
     try {
       const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:'
       const host = window.location.host
-      const res = await fetch(`${protocol}//${host}/api/questions/?skip=0&limit=20`)
+      const res = await apiFetch(`${protocol}//${host}/api/questions/?skip=0&limit=20`)
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data: { items: Question[]; total: number } = await res.json()
       setQuestions(data.items)
@@ -51,7 +52,7 @@ export default function QuestionAddTab() {
         body.category = category.trim()
       }
 
-      const res = await fetch(`${protocol}//${host}/api/questions/`, {
+      const res = await apiFetch(`${protocol}//${host}/api/questions/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

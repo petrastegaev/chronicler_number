@@ -200,7 +200,12 @@ async def websocket_endpoint(websocket: WebSocket):
                 websocket._reconnect_token = token
                 await websocket.send_json({
                     "event": "joined",
-                    "data": {"role": "admin", "token": token}
+                    "data": {
+                        "role": "admin",
+                        "token": token,
+                        "player1_nickname": manager.player1_nickname,
+                        "player2_nickname": manager.player2_nickname,
+                    }
                 })
             elif role == "player":
                 # Validate nickname (BUG-09: enforce 1-15 char limit)
