@@ -1,6 +1,6 @@
 interface BottomTabBarProps {
-  activeTab: 'game' | 'questions'
-  onTabChange: (tab: 'game' | 'questions') => void
+  activeTab: 'game' | 'questions' | 'leaderboard'
+  onTabChange: (tab: 'game' | 'questions' | 'leaderboard') => void
 }
 
 export default function BottomTabBar({ activeTab, onTabChange }: BottomTabBarProps) {
@@ -69,6 +69,56 @@ export default function BottomTabBar({ activeTab, onTabChange }: BottomTabBarPro
           className={`text-sm ${activeTab === 'questions' ? 'font-semibold text-wb-text' : 'text-wb-text-muted'}`}
         >
           Вопросы
+        </span>
+      </button>
+      <button
+        type="button"
+        onClick={() => onTabChange('leaderboard')}
+        className="flex min-h-[44px] min-w-[44px] flex-1 flex-col items-center justify-center gap-1"
+      >
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          strokeWidth="2"
+          stroke="currentColor"
+          fill="none"
+          className={activeTab === 'leaderboard' ? 'text-player1' : 'text-wb-text-muted'}
+        >
+          <path
+            d="M6 9H4.5a2.5 2.5 0 0 1 0-5C5.5 4 6 4.5 6 6v3z"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M18 9h1.5a2.5 2.5 0 0 0 0-5C18.5 4 18 4.5 18 6v3z"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M6 9a6 6 0 0 0 12 0"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M12 15v4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <rect
+            x="8"
+            y="19"
+            width="8"
+            height="2"
+            rx="1"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <span
+          className={`text-sm ${activeTab === 'leaderboard' ? 'font-semibold text-wb-text' : 'text-wb-text-muted'}`}
+        >
+          Рекорды
         </span>
       </button>
     </nav>

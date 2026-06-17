@@ -7,6 +7,20 @@ class StatsResponse(BaseModel):
     game_count: int
 
 
+class LeaderboardEntry(BaseModel):
+    rank: int
+    nickname: str
+    games_played: int
+    wins: int
+    losses: int
+    win_rate: float
+    total_score: int
+
+
+class LeaderboardResponse(BaseModel):
+    entries: list[LeaderboardEntry]
+
+
 class CsvImportResponse(BaseModel):
     added: int
     errors: list[str]
