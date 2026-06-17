@@ -112,9 +112,10 @@ Plans: 2 (05-01, 05-02) in 2 waves
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260617-r8b | Применить дизайн из Figma (цвета, шрифты CoFo Sans Pixel), переименовать игру на Число летописца | 2026-06-17 | 8011838 | [260617-r8b-figma-cofo-sans-pixel](./quick/260617-r8b-figma-cofo-sans-pixel/) |
+| 260617-rlu | Добавить таблицу рекордов (Leaderboard) в админ-панель | 2026-06-17 | 2061417 | [260617-rlu-leaderboard](./quick/260617-rlu-leaderboard/) |
 
 ## Session Continuity
 
-**Last session:** 2026-06-17T16:36:22.216Z
-**This session:** 2026-06-17 — Quick task 260617-r8b: Figma design + fonts + rename
+**Last session:** 2026-06-17T16:55:00.000Z
+**This session:** 2026-06-17 — Quick task 260617-rlu: Leaderboard feature
 **Next session:** Execute `/gsd-execute-phase 05` or new quick task
