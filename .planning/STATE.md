@@ -5,7 +5,7 @@ milestone_name: milestone
 current_phase: 05
 current_plan: 1
 status: milestone_complete
-last_updated: 2026-06-11T07:53:04.800Z
+last_updated: 2026-06-18T14:42:16.222Z
 progress:
   total_phases: 5
   completed_phases: 4
@@ -113,9 +113,10 @@ Plans: 2 (05-01, 05-02) in 2 waves
 |---|-------------|------|--------|-----------|
 | 260617-r8b | Применить дизайн из Figma (цвета, шрифты CoFo Sans Pixel), переименовать игру на Число летописца | 2026-06-17 | 8011838 | [260617-r8b-figma-cofo-sans-pixel](./quick/260617-r8b-figma-cofo-sans-pixel/) |
 | 260617-rlu | Добавить таблицу рекордов (Leaderboard) в админ-панель | 2026-06-17 | 2061417 | [260617-rlu-leaderboard](./quick/260617-rlu-leaderboard/) |
+| 260618-ol8 | Импорт вопросов «Числа летописца» из Google Sheets (95 вопросов, 7 категорий) | 2026-06-18 | — | [260618-ol8-https-docs-google-com-spreadsheets-d-19d](./quick/260618-ol8-https-docs-google-com-spreadsheets-d-19d/) |
 
 ## Session Continuity
 
-**Last session:** 2026-06-17T16:55:00.000Z
-**This session:** 2026-06-17 — Quick task 260617-rlu: Leaderboard feature
+**Last session:** 2026-06-18T14:42:16.222Z
+**This session:** 2026-06-18 — Quick task 260618-ol8: Import chronicler questions from Google Sheets
 **Next session:** Execute `/gsd-execute-phase 05` or new quick task
