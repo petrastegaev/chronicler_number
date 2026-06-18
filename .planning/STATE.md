@@ -113,7 +113,7 @@ Plans: 2 (05-01, 05-02) in 2 waves
 |---|-------------|------|--------|-----------|
 | 260617-r8b | Применить дизайн из Figma (цвета, шрифты CoFo Sans Pixel), переименовать игру на Число летописца | 2026-06-17 | 8011838 | [260617-r8b-figma-cofo-sans-pixel](./quick/260617-r8b-figma-cofo-sans-pixel/) |
 | 260617-rlu | Добавить таблицу рекордов (Leaderboard) в админ-панель | 2026-06-17 | 2061417 | [260617-rlu-leaderboard](./quick/260617-rlu-leaderboard/) |
-| 260618-ol8 | Импорт вопросов «Числа летописца» из Google Sheets (95 вопросов, 7 категорий) | 2026-06-18 | — | [260618-ol8-https-docs-google-com-spreadsheets-d-19d](./quick/260618-ol8-https-docs-google-com-spreadsheets-d-19d/) |
+| 260618-ol8 | Импорт вопросов «Числа летописца» из Google Sheets (95 вопросов, 7 категорий) | 2026-06-18 | 9a6bd3c | [260618-ol8-https-docs-google-com-spreadsheets-d-19d](./quick/260618-ol8-https-docs-google-com-spreadsheets-d-19d/) |
 
 ## Session Continuity
 
