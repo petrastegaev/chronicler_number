@@ -1,15 +1,18 @@
 import asyncio
+import csv
+import io
+import logging
 import os
 import pathlib
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import event
+from sqlalchemy import event, func, select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from connection_manager import ConnectionManager
-from models import Base
+from models import Base, Question
 from routers import questions as questions_router
 from routers import stats as stats_router
 from typing import Optional
@@ -28,6 +31,52 @@ manager = ConnectionManager()
 active_session: Optional[GameSession] = None
 game_task: Optional[asyncio.Task] = None
 game_lock = asyncio.Lock()  # Guards against double-start race (SEC-04, BUG-04)
+
+# Path to seed CSV bundled with the backend
+_SEED_CSV = pathlib.Path(__file__).resolve().parent / "seed_data" / "chronicler_questions.csv"
+
+
+async def _seed_questions(session_factory):
+    """Import bundled questions from CSV into the database if the table is empty."""
+    if not _SEED_CSV.exists():
+        return
+
+    async with session_factory() as db:
+        count = (await db.execute(select(func.count(Question.id)))).scalar_one()
+        if count > 0:
+            return  # Already seeded
+
+        content = _SEED_CSV.read_text(encoding="utf-8-sig")
+        reader = csv.reader(io.StringIO(content))
+        to_add: list[Question] = []
+        skipped = 0
+
+        for row in reader:
+            if len(row) < 2:
+                skipped += 1
+                continue
+            text = row[0].strip()
+            try:
+                answer = int(row[1].strip())
+            except (ValueError, IndexError):
+                skipped += 1
+                continue
+            if not text or answer < 0 or answer > 1_000_000:
+                skipped += 1
+                continue
+            category = row[2].strip() if len(row) > 2 and row[2].strip() else None
+            to_add.append(Question(text=text, answer=answer, category=category))
+
+        if to_add:
+            db.add_all(to_add)
+            await db.commit()
+            logging.getLogger("uvicorn").info(
+                f"[seed] Imported {len(to_add)} chronicler questions (skipped {skipped} rows)"
+            )
+        else:
+            logging.getLogger("uvicorn").warning(
+                f"[seed] No valid rows found in {_SEED_CSV.name}"
+            )
 
 
 async def reset_game():
@@ -75,6 +124,9 @@ async def lifespan(app: FastAPI):
         await conn.run_sync(Base.metadata.create_all)
 
     app.state.engine = engine
+
+    # Seed chronicler questions from bundled CSV (idempotent — skips if table non-empty)
+    await _seed_questions(app.state.session_factory)
 
     # Start periodic token cleanup to prevent unbounded memory growth
     token_cleanup_task = asyncio.create_task(cleanup_expired_tokens())
