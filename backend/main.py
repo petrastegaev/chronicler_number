@@ -20,7 +20,7 @@ from game.tokens import cleanup_expired_tokens, generate_token, remove_token, re
 from services.question_service import QuestionService
 
 # Resolve absolute database path relative to this file, and ensure data directory exists
-_DB_DIR = pathlib.Path(__file__).resolve().parent.parent / 'data'
+_DB_DIR = pathlib.Path(__file__).resolve().parent / 'data'
 _DB_DIR.mkdir(parents=True, exist_ok=True)
 _DATABASE_URL = f'sqlite+aiosqlite:///{_DB_DIR / "game.db"}'
 
@@ -337,22 +337,45 @@ async def websocket_endpoint(websocket: WebSocket):
                 game_task = None
                 active_session = None
 
-# 3. SPA fallback middleware — serves index.html for 404s on non-API GET requests
+# 3. SPA fallback catch-all route — serves index.html for non-API GET paths
+#    that don't match a static file on disk. Registered BEFORE StaticFiles mount
+#    so it takes priority over the catch-all static directory handler.
+#    Does NOT match root "/" (/{full_path:path} requires at least one path segment).
+import os
+from fastapi import HTTPException
 from fastapi.responses import FileResponse
-from starlette.middleware.base import BaseHTTPMiddleware
 
 
-class SpaFallbackMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request, call_next):
-        response = await call_next(request)
-        if response.status_code == 404 and request.method == "GET":
-            path = request.url.path
-            if not path.startswith("/api/") and path != "/ws":
-                return FileResponse("static/index.html")
-        return response
+@app.get("/{full_path:path}")
+async def serve_spa_fallback(full_path: str):
+    """Catch-all route for SPA client-side routing.
+
+    - API paths (/api/*) → 404 (shouldn't reach here; API routes match first)
+    - Real static files → served directly from static/ directory
+    - Everything else → index.html for React Router
+    """
+    # Safety: don't serve anything outside the static directory
+    if full_path.startswith("api/"):
+        raise HTTPException(status_code=404)
+
+    static_dir = os.path.join(os.path.dirname(__file__), "static")
+    safe_path = os.path.normpath(full_path)
+    if ".." in safe_path.split(os.sep):
+        raise HTTPException(status_code=404)
+
+    file_path = os.path.join(static_dir, safe_path)
+
+    # Serve existing static files (fonts, sounds, JS bundles, CSS)
+    if os.path.isfile(file_path):
+        return FileResponse(file_path)
+
+    # SPA route — serve index.html
+    index_path = os.path.join(static_dir, "index.html")
+    if os.path.isfile(index_path):
+        return FileResponse(index_path)
+
+    raise HTTPException(status_code=404)
 
 
-app.add_middleware(SpaFallbackMiddleware)
-
-# 4. StaticFiles mount (must be last)
+# 4. StaticFiles mount (must be last) — handles root "/" and directory requests
 app.mount("/", StaticFiles(directory="static", html=True), name="static")

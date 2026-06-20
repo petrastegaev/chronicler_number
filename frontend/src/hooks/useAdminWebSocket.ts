@@ -55,6 +55,8 @@ export function useAdminWebSocket() {
         store.setPhase('lobby')
         if (data.token) {
           store.setToken(data.token)
+          // Save reconnect token for session recovery across page refreshes
+          try { localStorage.setItem('ws_reconnect_token', data.token) } catch {}
         }
         // Apply existing player state (admin connected after players)
         if (data.player1_nickname) {
@@ -120,6 +122,7 @@ export function useAdminWebSocket() {
         if (msg.event === 'error') {
           const errorData = msg.data as { message?: string }
           console.warn('[WS Admin] Server error:', errorData.message ?? 'Unknown error')
+          store.setAuthError(errorData.message ?? 'Ошибка авторизации')
         }
         break
       }
@@ -182,7 +185,10 @@ export function useAdminWebSocket() {
 
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
     const host = window.location.host
-    const ws = new WebSocket(`${protocol}//${host}/ws`)
+    // Restore reconnect token from localStorage for seamless session recovery
+    const savedToken = (() => { try { return localStorage.getItem('ws_reconnect_token') } catch { return null } })()
+    const tokenParam = savedToken ? `?token=${savedToken}` : ''
+    const ws = new WebSocket(`${protocol}//${host}/ws${tokenParam}`)
     wsRef.current = ws
 
     ws.onopen = () => {

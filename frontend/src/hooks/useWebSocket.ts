@@ -51,6 +51,11 @@ export function useWebSocket() {
           player_number?: 1 | 2
           player1_nickname?: string | null
           player2_nickname?: string | null
+          token?: string
+        }
+        // Save reconnect token so page refresh recovers the session
+        if (data.token) {
+          try { localStorage.setItem('ws_reconnect_token', data.token) } catch {}
         }
         store.setPlayerNumber(data.player_number ?? null)
         const opponentNick =
@@ -193,7 +198,10 @@ export function useWebSocket() {
 
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
     const host = window.location.host
-    const ws = new WebSocket(`${protocol}//${host}/ws`)
+    // Restore reconnect token from localStorage for seamless session recovery
+    const savedToken = (() => { try { return localStorage.getItem('ws_reconnect_token') } catch { return null } })()
+    const tokenParam = savedToken ? `?token=${savedToken}` : ''
+    const ws = new WebSocket(`${protocol}//${host}/ws${tokenParam}`)
     wsRef.current = ws
 
     ws.onopen = () => {

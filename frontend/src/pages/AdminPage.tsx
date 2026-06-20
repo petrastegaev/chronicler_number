@@ -13,6 +13,7 @@ export default function AdminPage() {
   const [keyError, setKeyError] = useState('')
   const ws = useAdminStore((s) => s.ws)
   const phase = useAdminStore((s) => s.phase)
+  const authError = useAdminStore((s) => s.authError)
   const { connect } = useAdminWebSocket()
 
   const handleLogin = () => {
@@ -21,6 +22,7 @@ export default function AdminPage() {
       return
     }
     setKeyError('')
+    useAdminStore.getState().setAuthError(null) // Clear previous auth errors
     useAdminStore.getState().setAdminKey(adminKey.trim())
     connect(adminKey.trim())
   }
@@ -58,6 +60,9 @@ export default function AdminPage() {
           />
           {keyError && (
             <p className="mt-2 text-sm text-red-500">{keyError}</p>
+          )}
+          {authError && phase === 'waiting' && (
+            <p className="mt-2 text-sm text-red-500">{authError}</p>
           )}
           {phase === 'connecting' && (
             <p className="mt-2 text-sm text-wb-text-muted">Подключение...</p>

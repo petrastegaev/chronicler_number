@@ -25,6 +25,7 @@ interface AdminState {
   csvResult: { added: number; errors: string[] } | null
   token: string | null
   adminKey: string | null
+  authError: string | null
 }
 
 interface AdminActions {
@@ -45,6 +46,7 @@ interface AdminActions {
   clearCsvResult: () => void
   setToken: (token: string | null) => void
   setAdminKey: (key: string | null) => void
+  setAuthError: (error: string | null) => void
   setGameStarted: (p1Nickname: string, p2Nickname: string) => void
   setScoreUpdate: (p1Score: number, p2Score: number) => void
   resetForRestart: () => void
@@ -70,6 +72,7 @@ const initialState: AdminState = {
   csvResult: null,
   token: null,
   adminKey: null,
+  authError: null,
 }
 
 export const useAdminStore = create<AdminStore>((set) => ({
@@ -92,6 +95,7 @@ export const useAdminStore = create<AdminStore>((set) => ({
   clearCsvResult: () => set({ csvResult: null }),
   setToken: (token) => set({ token }),
   setAdminKey: (key) => set({ adminKey: key }),
+  setAuthError: (error) => set({ authError: error }),
 
   setGameStarted: (p1Nickname, p2Nickname) =>
     set({
@@ -116,6 +120,7 @@ export const useAdminStore = create<AdminStore>((set) => ({
       currentRound: 0,
       player1Online: false,
       player2Online: false,
+      authError: null,
       // Keep nicknames for rejoin convenience (Pitfall 1 in RESEARCH.md)
       // Online booleans reset — players must reconnect to be marked Ready
     }),

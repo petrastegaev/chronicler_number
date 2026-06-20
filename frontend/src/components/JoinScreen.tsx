@@ -4,6 +4,7 @@ import { useGameStore } from '../stores/gameStore'
 
 export default function JoinScreen() {
   const [nickname, setNickname] = useState('')
+  const [error, setError] = useState('')
   const phase = useGameStore((s) => s.phase)
   const joinGame = useGameStore((s) => s.joinGame)
 
@@ -11,7 +12,12 @@ export default function JoinScreen() {
 
   const handleJoin = useCallback(() => {
     const trimmed = nickname.trim()
-    if (!trimmed || isSubmitting) return
+    if (!trimmed) {
+      setError('Введите никнейм')
+      return
+    }
+    if (isSubmitting) return
+    setError('')
     joinGame(trimmed)
   }, [nickname, isSubmitting, joinGame])
 
@@ -32,13 +38,19 @@ export default function JoinScreen() {
           maxLength={15}
           placeholder="Введите ваш ник"
           value={nickname}
-          onChange={(e) => setNickname(e.target.value)}
+          onChange={(e) => {
+            setNickname(e.target.value)
+            if (error) setError('')
+          }}
           onKeyDown={(e) => {
             if (e.key === 'Enter') handleJoin()
           }}
           disabled={isSubmitting}
           className="w-full rounded-lg border border-wb-text-muted/30 bg-wb-bg px-4 py-3 text-base text-wb-text placeholder:text-wb-text-muted focus:border-player1 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         />
+        {error && (
+          <p className="mt-2 text-sm text-red-500">{error}</p>
+        )}
         <button
           type="button"
           onClick={handleJoin}
