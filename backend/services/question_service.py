@@ -54,9 +54,14 @@ class QuestionService:
 
         Expected CSV format: text,answer[,category]
         Returns: {"added": int, "errors": list[str]}
+
+        All rows are validated first, then inserted in a single atomic commit
+        via add_all. If any row fails validation, it is skipped (partial import
+        is allowed by design — errors are reported to the caller).
         """
         added = 0
         errors: list[str] = []
+        questions: list[Question] = []
 
         reader = csv.reader(io.StringIO(file_content.decode("utf-8-sig")))
         for row_num, row in enumerate(reader, start=1):
@@ -89,12 +94,14 @@ class QuestionService:
                 errors.append(f"Строка {row_num}: Категория слишком длинная")
                 continue
 
-            await QuestionService.create(db, text=text, answer=answer, category=category)
+            questions.append(Question(text=text, answer=answer, category=category))
             added += 1
 
             if added >= MAX_ROWS:
                 errors.append(f"Import stopped: maximum {MAX_ROWS} rows exceeded")
                 break
 
+        if questions:
+            db.add_all(questions)
         await db.commit()
         return {"added": added, "errors": errors}

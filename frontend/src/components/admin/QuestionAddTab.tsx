@@ -21,7 +21,8 @@ export default function QuestionAddTab() {
   const setQuestions = useAdminStore((s) => s.setQuestions)
   const setTotalQuestions = useAdminStore((s) => s.setTotalQuestions)
 
-  const canSubmit = text.trim().length > 0 && answer.trim().length > 0
+  const parsedAnswer = Number(answer.trim())
+  const canSubmit = text.trim().length > 0 && answer.trim().length > 0 && Number.isFinite(parsedAnswer)
 
   const refreshQuestionList = useCallback(async () => {
     try {

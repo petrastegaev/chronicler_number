@@ -47,7 +47,7 @@ export default function TimerRing() {
           transformOrigin: 'center',
         }}
         animate={{ pathLength: progress }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
+        transition={{ duration: 0.1 }}
       />
       {/* Digits inside */}
       <text

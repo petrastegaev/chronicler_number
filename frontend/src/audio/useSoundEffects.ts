@@ -30,9 +30,12 @@ export function useSoundEffects() {
   }, [])
 
   // Step 3: Subscribe to round_result for end_round sound
+  // Uses value-based comparison (round_number) to avoid object identity issues
   useEffect(() => {
-    const unsub = useGameStore.subscribe((state, prevState) => {
-      if (state.roundResult !== null && prevState.roundResult === null) {
+    const roundNonceRef = { current: 0 }
+    const unsub = useGameStore.subscribe((state, _prevState) => {
+      if (state.roundResult !== null && state.roundResult.round_number !== roundNonceRef.current) {
+        roundNonceRef.current = state.roundResult.round_number
         soundManager.play('end_round')
       }
     })
@@ -40,9 +43,12 @@ export function useSoundEffects() {
   }, [])
 
   // Step 4: Subscribe to game_end for winner sound
+  // Uses value-based comparison (winner string) to avoid object identity issues
   useEffect(() => {
-    const unsub = useGameStore.subscribe((state, prevState) => {
-      if (state.gameEndResult !== null && prevState.gameEndResult === null) {
+    const gameEndWinnerRef = { current: null as string | null }
+    const unsub = useGameStore.subscribe((state, _prevState) => {
+      if (state.gameEndResult !== null && state.gameEndResult.winner !== gameEndWinnerRef.current) {
+        gameEndWinnerRef.current = state.gameEndResult.winner
         soundManager.play('winner')
       }
     })

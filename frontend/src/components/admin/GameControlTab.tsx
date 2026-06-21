@@ -4,10 +4,12 @@ import { useAdminWebSocket } from '../../hooks/useAdminWebSocket'
 import { apiFetch } from '../../hooks/apiFetch'
 import GameStats from './GameStats'
 import PlayerSlot from './PlayerSlot'
+import ConfirmDialog from './ConfirmDialog'
 
 export default function GameControlTab() {
   const { startGame, restart } = useAdminWebSocket()
   const [startingGame, setStartingGame] = useState(false)
+  const [showResetConfirm, setShowResetConfirm] = useState(false)
 
   const phase = useAdminStore((s) => s.phase)
   const player1Nickname = useAdminStore((s) => s.player1Nickname)
@@ -38,9 +40,11 @@ export default function GameControlTab() {
   }, [phase, setTotalQuestions])
 
   // Reset startingGame when phase changes to playing (server confirmed start)
-  if (startingGame && phase === 'playing') {
-    setStartingGame(false)
-  }
+  useEffect(() => {
+    if (startingGame && phase === 'playing') {
+      setStartingGame(false)
+    }
+  }, [startingGame, phase])
 
   const canStartGame =
     player1Online &&
@@ -139,6 +143,15 @@ export default function GameControlTab() {
           {startingGame ? 'Запуск...' : 'Запустить игру'}
         </button>
       )}
+      {phase === 'playing' && (
+        <button
+          type="button"
+          onClick={() => setShowResetConfirm(true)}
+          className="flex min-h-[48px] w-full items-center justify-center rounded-xl bg-danger px-6 font-semibold text-white"
+        >
+          Сбросить игру
+        </button>
+      )}
       {phase === 'finished' && (
         <button
           type="button"
@@ -148,6 +161,21 @@ export default function GameControlTab() {
           Рестарт
         </button>
       )}
+
+      {/* Emergency reset confirmation dialog */}
+      <ConfirmDialog
+        isOpen={showResetConfirm}
+        title="Сбросить игру"
+        body="Вы уверены? Игра будет немедленно завершена, текущие результаты потеряны."
+        confirmLabel="Сбросить"
+        cancelLabel="Отмена"
+        onConfirm={() => {
+          setShowResetConfirm(false)
+          restart()
+        }}
+        onCancel={() => setShowResetConfirm(false)}
+        confirmVariant="danger"
+      />
 
       {/* Statistics */}
       <GameStats />

@@ -156,9 +156,11 @@ async def websocket_endpoint(websocket: WebSocket):
 
     # Reconnect path: check query param token (JOIN-05 / D-06)
     reconnect_token = websocket.query_params.get("token")
+    reconnected = False
     if reconnect_token:
         session_data = restore_from_token(reconnect_token)
         if session_data:
+            reconnected = True
             nickname = session_data["nickname"]
             role = session_data["role"]
             if role == "admin":
@@ -225,107 +227,108 @@ async def websocket_endpoint(websocket: WebSocket):
             return
 
     try:
-        # First message must be a join event (D-10)
-        data = await websocket.receive_json()
-        if data.get("event") == "join":
-            role = data.get("data", {}).get("role")
-            nickname = data.get("data", {}).get("nickname", "")
+        if not reconnected:
+            # First message must be a join event (D-10)
+            data = await websocket.receive_json()
+            if data.get("event") == "join":
+                role = data.get("data", {}).get("role")
+                nickname = data.get("data", {}).get("nickname", "")
 
-            if role == "admin":
-                admin_key = data.get("data", {}).get("admin_key", "")
-                if admin_key != ADMIN_KEY:
+                if role == "admin":
+                    admin_key = data.get("data", {}).get("admin_key", "")
+                    if admin_key != ADMIN_KEY:
+                        await websocket.send_json({
+                            "event": "error",
+                            "data": {"message": "Unauthorized admin access"}
+                        })
+                        await websocket.close()
+                        return
+                    if manager.admin is not None:
+                        await websocket.send_json({
+                            "event": "error",
+                            "data": {"message": "Admin slot already taken"}
+                        })
+                        await websocket.close()
+                        return
+                    manager.admin = websocket
+                    token = generate_token(nickname, "admin")
+                    websocket._reconnect_token = token
                     await websocket.send_json({
-                        "event": "error",
-                        "data": {"message": "Unauthorized admin access"}
+                        "event": "joined",
+                        "data": {
+                            "role": "admin",
+                            "token": token,
+                            "player1_nickname": manager.player1_nickname,
+                            "player2_nickname": manager.player2_nickname,
+                        }
                     })
-                    await websocket.close()
-                    return
-                if manager.admin is not None:
+                elif role == "player":
+                    # Validate nickname (BUG-09: enforce 1-15 char limit)
+                    if not nickname or len(nickname.strip()) < 1 or len(nickname) > 15:
+                        await websocket.send_json({
+                            "event": "error",
+                            "data": {"message": "Никнейм должен быть от 1 до 15 символов"}
+                        })
+                        await websocket.close()
+                        return
+                    if manager.player_count >= 2:
+                        await websocket.send_json({
+                            "event": "error",
+                            "data": {"message": "Game is full"}
+                        })
+                        await websocket.close()
+                        return
+                    player_num = 1 if manager.player1 is None else 2
+                    if player_num == 1:
+                        manager.player1 = websocket
+                        manager.player1_nickname = nickname
+                    else:
+                        manager.player2 = websocket
+                        manager.player2_nickname = nickname
+                    token = generate_token(nickname, "player")
+                    websocket._reconnect_token = token
                     await websocket.send_json({
-                        "event": "error",
-                        "data": {"message": "Admin slot already taken"}
+                        "event": "joined",
+                        "data": {
+                            "player_number": player_num,
+                            "nickname": nickname,
+                            "token": token,
+                            "player1_nickname": manager.player1_nickname,
+                            "player2_nickname": manager.player2_nickname,
+                        }
                     })
-                    await websocket.close()
-                    return
-                manager.admin = websocket
-                token = generate_token(nickname, "admin")
-                websocket._reconnect_token = token
-                await websocket.send_json({
-                    "event": "joined",
-                    "data": {
-                        "role": "admin",
-                        "token": token,
-                        "player1_nickname": manager.player1_nickname,
-                        "player2_nickname": manager.player2_nickname,
-                    }
-                })
-            elif role == "player":
-                # Validate nickname (BUG-09: enforce 1-15 char limit)
-                if not nickname or len(nickname.strip()) < 1 or len(nickname) > 15:
-                    await websocket.send_json({
-                        "event": "error",
-                        "data": {"message": "Никнейм должен быть от 1 до 15 символов"}
-                    })
-                    await websocket.close()
-                    return
-                if manager.player_count >= 2:
-                    await websocket.send_json({
-                        "event": "error",
-                        "data": {"message": "Game is full"}
-                    })
-                    await websocket.close()
-                    return
-                player_num = 1 if manager.player1 is None else 2
-                if player_num == 1:
-                    manager.player1 = websocket
-                    manager.player1_nickname = nickname
-                else:
-                    manager.player2 = websocket
-                    manager.player2_nickname = nickname
-                token = generate_token(nickname, "player")
-                websocket._reconnect_token = token
-                await websocket.send_json({
-                    "event": "joined",
-                    "data": {
-                        "player_number": player_num,
-                        "nickname": nickname,
-                        "token": token,
-                        "player1_nickname": manager.player1_nickname,
-                        "player2_nickname": manager.player2_nickname,
-                    }
-                })
-                # Notify admin of player join
-                await manager.send_to_admin({
-                    "event": "player_joined",
-                    "data": {
-                        "player_number": player_num,
-                        "nickname": nickname,
-                        "player1_nickname": manager.player1_nickname,
-                        "player2_nickname": manager.player2_nickname,
-                    }
-                })
-                # If player 2 just joined, notify player 1 (JOIN-04)
-                if player_num == 2 and manager.player1 is not None:
-                    await manager.send_to_player(1, {
+                    # Notify admin of player join
+                    await manager.send_to_admin({
                         "event": "player_joined",
-                        "data": {"player2_nickname": nickname}
+                        "data": {
+                            "player_number": player_num,
+                            "nickname": nickname,
+                            "player1_nickname": manager.player1_nickname,
+                            "player2_nickname": manager.player2_nickname,
+                        }
                     })
+                    # If player 2 just joined, notify player 1 (JOIN-04)
+                    if player_num == 2 and manager.player1 is not None:
+                        await manager.send_to_player(1, {
+                            "event": "player_joined",
+                            "data": {"player2_nickname": nickname}
+                        })
+                else:
+                    # Unknown role -- reject and close so the socket never hangs (BUG-UNKNOWN-ROLE)
+                    await websocket.send_json({
+                        "event": "error",
+                        "data": {"message": "Неизвестная роль"}
+                    })
+                    await websocket.close()
+                    return
             else:
-                # Unknown role -- reject and close so the socket never hangs (BUG-UNKNOWN-ROLE)
+                # First message was not a join event -- reject and close (BUG-UNKNOWN-ROLE)
                 await websocket.send_json({
                     "event": "error",
-                    "data": {"message": "Неизвестная роль"}
+                    "data": {"message": "Ожидалось событие join"}
                 })
                 await websocket.close()
                 return
-        else:
-            # First message was not a join event -- reject and close (BUG-UNKNOWN-ROLE)
-            await websocket.send_json({
-                "event": "error",
-                "data": {"message": "Ожидалось событие join"}
-            })
-            await websocket.close()
-            return
 
         # Event dispatch loop
         while True:

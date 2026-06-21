@@ -31,14 +31,16 @@ async def get_leaderboard(
             SELECT
                 player1_nickname AS nickname,
                 player1_score AS score,
-                CASE WHEN winner_nickname = player1_nickname AND winner_nickname IS NOT NULL THEN 1 ELSE 0 END AS is_win
+                CASE WHEN winner_nickname = player1_nickname THEN 1 ELSE 0 END AS is_win
             FROM game_sessions
+            WHERE winner_nickname IS NOT NULL
             UNION ALL
             SELECT
                 player2_nickname AS nickname,
                 player2_score AS score,
-                CASE WHEN winner_nickname = player2_nickname AND winner_nickname IS NOT NULL THEN 1 ELSE 0 END AS is_win
+                CASE WHEN winner_nickname = player2_nickname THEN 1 ELSE 0 END AS is_win
             FROM game_sessions
+            WHERE winner_nickname IS NOT NULL
         )
         SELECT
             nickname,

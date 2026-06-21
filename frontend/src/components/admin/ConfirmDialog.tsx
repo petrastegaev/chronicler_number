@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 
 interface ConfirmDialogProps {
@@ -21,6 +22,16 @@ export default function ConfirmDialog({
   onCancel,
   confirmVariant = 'danger',
 }: ConfirmDialogProps) {
+  // Close on Escape key
+  useEffect(() => {
+    if (!isOpen) return
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onCancel()
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [isOpen, onCancel])
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -30,6 +41,9 @@ export default function ConfirmDialog({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) onCancel()
+          }}
         >
           <motion.div
             className="mx-4 max-w-sm rounded-xl bg-wb-surface p-6"
@@ -42,12 +56,15 @@ export default function ConfirmDialog({
             <p className="mt-2 text-sm text-wb-text-muted">{body}</p>
             <div className="mt-6 flex flex-row gap-3">
               <button
+                type="button"
+                autoFocus
                 className="min-h-[44px] flex-1 rounded-lg border border-wb-text-muted/30 text-sm font-semibold text-wb-text"
                 onClick={onCancel}
               >
                 {cancelLabel}
               </button>
               <button
+                type="button"
                 className={`min-h-[44px] flex-1 rounded-lg text-sm font-semibold text-white ${
                   confirmVariant === 'primary' ? 'bg-player1' : 'bg-danger'
                 }`}

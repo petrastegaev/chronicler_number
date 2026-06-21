@@ -17,6 +17,9 @@ export interface JoinedEvent extends WsMessage {
     role: 'player' | 'admin'
     player_number?: number
     nickname?: string
+    token?: string
+    player1_nickname?: string | null
+    player2_nickname?: string | null
   }
 }
 

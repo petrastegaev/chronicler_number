@@ -71,7 +71,7 @@ class GameSession:
             }
         })
         self.state = "accepting_answers"
-        self.answer_deadline = time.monotonic() + 10.0
+        self.answer_deadline = time.monotonic() + 10.0 + 0.05
 
         # Timer: 10 seconds, tick every 1 second (11 ticks: 10 down to 0)
         for remaining in range(10, -1, -1):

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 
 interface ToastProps {
@@ -7,14 +7,17 @@ interface ToastProps {
 }
 
 export default function Toast({ message, onDismiss }: ToastProps) {
+  const onDismissRef = useRef(onDismiss)
+  onDismissRef.current = onDismiss
+
   useEffect(() => {
     if (message !== null) {
       const timer = setTimeout(() => {
-        onDismiss()
+        onDismissRef.current()
       }, 3000)
       return () => clearTimeout(timer)
     }
-  }, [message, onDismiss])
+  }, [message])
 
   return (
     <div className="pointer-events-none fixed inset-x-0 top-4 z-50 flex justify-center">
