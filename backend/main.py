@@ -19,7 +19,7 @@ from typing import Optional
 
 from auth import ADMIN_KEY
 from game.session import GameSession
-from game.tokens import cleanup_expired_tokens, generate_token, remove_token, restore_from_token
+from game.tokens import cleanup_expired_tokens, generate_token, restore_from_token
 from services.question_service import QuestionService
 
 # Resolve absolute database path relative to this file, and ensure data directory exists
@@ -310,6 +310,22 @@ async def websocket_endpoint(websocket: WebSocket):
                         "event": "player_joined",
                         "data": {"player2_nickname": nickname}
                     })
+            else:
+                # Unknown role -- reject and close so the socket never hangs (BUG-UNKNOWN-ROLE)
+                await websocket.send_json({
+                    "event": "error",
+                    "data": {"message": "Неизвестная роль"}
+                })
+                await websocket.close()
+                return
+        else:
+            # First message was not a join event -- reject and close (BUG-UNKNOWN-ROLE)
+            await websocket.send_json({
+                "event": "error",
+                "data": {"message": "Ожидалось событие join"}
+            })
+            await websocket.close()
+            return
 
         # Event dispatch loop
         while True:
@@ -363,10 +379,6 @@ async def websocket_endpoint(websocket: WebSocket):
                     await reset_game()
 
     except WebSocketDisconnect:
-        # Clean up reconnect token if tracked
-        token = getattr(websocket, '_reconnect_token', None)
-        if token:
-            remove_token(token)
         if manager.player1 == websocket:
             manager.player1 = None
             manager.player1_nickname = None

@@ -30,13 +30,17 @@ class GameSession:
     async def run(self, questions: list):
         """Main game loop. Launched via asyncio.create_task()."""
         self.questions = questions
+        # Snapshot nicknames at game start so a mid-game disconnect (which nulls
+        # manager.playerN_nickname) cannot blank the persisted/broadcast names (BUG-NICKNAME-NULL).
+        self.player1_nickname = self.manager.player1_nickname or ""
+        self.player2_nickname = self.manager.player2_nickname or ""
         self.state = "ready"
 
         await self.manager.broadcast({
             "event": "game_started",
             "data": {
-                "player1_nickname": self.manager.player1_nickname or "",
-                "player2_nickname": self.manager.player2_nickname or "",
+                "player1_nickname": self.player1_nickname,
+                "player2_nickname": self.player2_nickname,
             }
         })
 
@@ -155,15 +159,15 @@ class GameSession:
         self.state = "finished"
 
         if self.p1_score > self.p2_score:
-            winner = self.manager.player1_nickname
+            winner = self.player1_nickname
         elif self.p2_score > self.p1_score:
-            winner = self.manager.player2_nickname
+            winner = self.player2_nickname
         else:
             winner = None  # "Ничья"
 
         game_end_data = {
-            "player1_nickname": self.manager.player1_nickname or "",
-            "player2_nickname": self.manager.player2_nickname or "",
+            "player1_nickname": self.player1_nickname,
+            "player2_nickname": self.player2_nickname,
             "player1_score": self.p1_score,
             "player2_score": self.p2_score,
             "winner": winner,
@@ -191,8 +195,8 @@ class GameSession:
         async with self.session_factory() as db:
             try:
                 game_session = GameSessionModel(
-                    player1_nickname=self.manager.player1_nickname or "",
-                    player2_nickname=self.manager.player2_nickname or "",
+                    player1_nickname=self.player1_nickname,
+                    player2_nickname=self.player2_nickname,
                     player1_score=self.p1_score,
                     player2_score=self.p2_score,
                     winner_nickname=winner_nickname,
