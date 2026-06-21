@@ -33,7 +33,7 @@ export default function QuestionListTab() {
         const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:'
         const host = window.location.host
         const res = await apiFetch(
-          `${protocol}//${host}/api/questions/?skip=${pageNum * 20}&limit=20`,
+          `${protocol}//${host}/api/questions/?offset=0&limit=${(pageNum + 1) * 20}`,
         )
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         const data: { items: Question[]; total: number } = await res.json()
