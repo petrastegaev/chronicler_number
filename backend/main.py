@@ -168,7 +168,13 @@ async def websocket_endpoint(websocket: WebSocket):
                 websocket._reconnect_token = reconnect_token
                 await websocket.send_json({
                     "event": "joined",
-                    "data": {"role": "admin", "nickname": nickname, "token": reconnect_token}
+                    "data": {
+                        "role": "admin",
+                        "nickname": nickname,
+                        "token": reconnect_token,
+                        "player1_nickname": manager.player1_nickname,
+                        "player2_nickname": manager.player2_nickname,
+                    }
                 })
             elif role == "player":
                 # Reconnect to existing slot by nickname
@@ -336,6 +342,12 @@ async def websocket_endpoint(websocket: WebSocket):
             event = msg.get("event")
             payload = msg.get("data", {})
 
+            # Keep-alive ping/pong — prevents client heartbeat from firing
+            # during quiet periods (e.g. admin sitting in lobby with no messages)
+            if event == "ping":
+                await websocket.send_json({"event": "pong", "data": {}})
+                continue
+
             # Player event routing
             if websocket in (manager.player1, manager.player2):
                 player_num = 1 if websocket == manager.player1 else 2
@@ -380,6 +392,38 @@ async def websocket_endpoint(websocket: WebSocket):
                             active_session.start_event.set()
                 elif event == "restart":
                     await reset_game()
+                elif event == "reset_players":
+                    # Close player connections and clear their slots.
+                    # Players receive players_reset → phase='idle' → join screen.
+                    for player_ws in (manager.player1, manager.player2):
+                        if player_ws:
+                            try:
+                                await player_ws.send_json({
+                                    "event": "players_reset",
+                                    "data": {"message": "Администратор сбросил игроков"}
+                                })
+                                await player_ws.close()
+                            except Exception:
+                                pass
+                    manager.player1 = None
+                    manager.player2 = None
+                    manager.player1_nickname = None
+                    manager.player2_nickname = None
+
+                    # Cancel any running game
+                    if game_task is not None and not game_task.done():
+                        game_task.cancel()
+                        try:
+                            await game_task
+                        except asyncio.CancelledError:
+                            pass
+                        game_task = None
+                    active_session = None
+
+                    await websocket.send_json({
+                        "event": "players_reset",
+                        "data": {"message": "Игроки сброшены"}
+                    })
 
     except WebSocketDisconnect:
         if manager.player1 == websocket:

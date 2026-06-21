@@ -5,7 +5,7 @@ import type { WsMessage } from '../types/ws'
 const MAX_RECONNECT_DELAY = 10000
 const BASE_RECONNECT_DELAY = 1000
 const HEARTBEAT_INTERVAL = 15000
-const HEARTBEAT_TIMEOUT = 30000
+const HEARTBEAT_TIMEOUT = 60000
 
 function isWsMessage(raw: unknown): raw is WsMessage {
   return (
@@ -52,6 +52,7 @@ export function useAdminWebSocket() {
           player1_nickname?: string | null
           player2_nickname?: string | null
         }
+        store.setEverJoined(true)
         store.setPhase('lobby')
         if (data.token) {
           store.setToken(data.token)
@@ -90,6 +91,10 @@ export function useAdminWebSocket() {
       }
       case 'game_end': {
         store.setPhase('finished')
+        break
+      }
+      case 'players_reset': {
+        store.resetPlayers()
         break
       }
       case 'game_reset': {
@@ -147,9 +152,17 @@ export function useAdminWebSocket() {
         }
         return
       }
+
+      // Send an application-level ping to keep the connection alive during
+      // quiet periods (e.g. lobby with no server messages). The server echoes
+      // back a pong, which updates lastMessageTimeRef via onmessage.
+      if (wsRef.current?.readyState === WebSocket.OPEN) {
+        wsRef.current.send(JSON.stringify({ event: 'ping', data: {} }))
+      }
+
       const timeSinceLastMessage = Date.now() - lastMessageTimeRef.current
       if (timeSinceLastMessage > HEARTBEAT_TIMEOUT) {
-        console.warn('[WS Admin] Heartbeat timeout — no message in 30s, reconnecting...')
+        console.warn('[WS Admin] Heartbeat timeout — no message in 60s, reconnecting...')
         if (heartbeatTimerRef.current) {
           clearInterval(heartbeatTimerRef.current)
           heartbeatTimerRef.current = null
@@ -263,6 +276,16 @@ export function useAdminWebSocket() {
     )
   }, [])
 
+  const resetPlayers = useCallback(() => {
+    const store = useAdminStore.getState()
+    store.ws?.send(
+      JSON.stringify({
+        event: 'reset_players',
+        data: {},
+      })
+    )
+  }, [])
+
   useEffect(() => {
     return () => {
       intentionalCloseRef.current = true
@@ -278,5 +301,5 @@ export function useAdminWebSocket() {
     }
   }, [])
 
-  return { connect, startGame, restart }
+  return { connect, startGame, restart, resetPlayers }
 }

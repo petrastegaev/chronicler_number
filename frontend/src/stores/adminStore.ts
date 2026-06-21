@@ -26,6 +26,7 @@ interface AdminState {
   token: string | null
   adminKey: string | null
   authError: string | null
+  everJoined: boolean
 }
 
 interface AdminActions {
@@ -47,6 +48,8 @@ interface AdminActions {
   setToken: (token: string | null) => void
   setAdminKey: (key: string | null) => void
   setAuthError: (error: string | null) => void
+  setEverJoined: (value: boolean) => void
+  resetPlayers: () => void
   setGameStarted: (p1Nickname: string, p2Nickname: string) => void
   setScoreUpdate: (p1Score: number, p2Score: number) => void
   resetForRestart: () => void
@@ -73,12 +76,14 @@ const initialState: AdminState = {
   token: null,
   adminKey: null,
   authError: null,
+  everJoined: false,
 }
 
 export const useAdminStore = create<AdminStore>((set) => ({
   ...initialState,
 
   setPhase: (phase) => set({ phase }),
+  setEverJoined: (value) => set({ everJoined: value }),
   setPlayer1Nickname: (name) => set({ player1Nickname: name }),
   setPlayer2Nickname: (name) => set({ player2Nickname: name }),
   setPlayer1Online: (online) => set({ player1Online: online }),
@@ -96,6 +101,17 @@ export const useAdminStore = create<AdminStore>((set) => ({
   setToken: (token) => set({ token }),
   setAdminKey: (key) => set({ adminKey: key }),
   setAuthError: (error) => set({ authError: error }),
+
+  resetPlayers: () =>
+    set({
+      player1Nickname: '',
+      player2Nickname: '',
+      player1Online: false,
+      player2Online: false,
+      player1Score: 0,
+      player2Score: 0,
+      currentRound: 0,
+    }),
 
   setGameStarted: (p1Nickname, p2Nickname) =>
     set({
@@ -121,7 +137,7 @@ export const useAdminStore = create<AdminStore>((set) => ({
       player1Online: false,
       player2Online: false,
       authError: null,
-      // Keep nicknames for rejoin convenience (Pitfall 1 in RESEARCH.md)
+      // Keep nicknames + everJoined for rejoin convenience (Pitfall 1 in RESEARCH.md)
       // Online booleans reset — players must reconnect to be marked Ready
     }),
 

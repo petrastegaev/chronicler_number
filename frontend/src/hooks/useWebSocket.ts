@@ -127,6 +127,12 @@ export function useWebSocket() {
         store.setGameEndResultData(data)
         break
       }
+      case 'players_reset': {
+        // Admin cleared the player slots — go back to join screen, don't reconnect
+        store.reset()
+        store.setPhase('idle')
+        break
+      }
       case 'game_reset': {
         store.reset()
         store.setPhase('waiting')

@@ -7,7 +7,7 @@ import PlayerSlot from './PlayerSlot'
 import ConfirmDialog from './ConfirmDialog'
 
 export default function GameControlTab() {
-  const { startGame, restart } = useAdminWebSocket()
+  const { startGame, restart, resetPlayers } = useAdminWebSocket()
   const [startingGame, setStartingGame] = useState(false)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
 
@@ -134,14 +134,25 @@ export default function GameControlTab() {
 
       {/* Action button */}
       {phase === 'lobby' && (
-        <button
-          type="button"
-          onClick={handleStartGame}
-          disabled={!canStartGame || startingGame}
-          className="flex min-h-[48px] w-full items-center justify-center rounded-xl bg-player1 px-6 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {startingGame ? 'Запуск...' : 'Запустить игру'}
-        </button>
+        <>
+          <button
+            type="button"
+            onClick={handleStartGame}
+            disabled={!canStartGame || startingGame}
+            className="flex min-h-[48px] w-full items-center justify-center rounded-xl bg-player1 px-6 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {startingGame ? 'Запуск...' : 'Запустить игру'}
+          </button>
+          {(player1Nickname || player2Nickname) && (
+            <button
+              type="button"
+              onClick={resetPlayers}
+              className="flex min-h-[48px] w-full items-center justify-center rounded-xl border border-wb-text-muted/30 bg-wb-surface px-6 font-semibold text-wb-text-muted"
+            >
+              Сбросить игроков
+            </button>
+          )}
+        </>
       )}
       {phase === 'playing' && (
         <button
@@ -153,13 +164,22 @@ export default function GameControlTab() {
         </button>
       )}
       {phase === 'finished' && (
-        <button
-          type="button"
-          onClick={restart}
-          className="flex min-h-[48px] w-full items-center justify-center rounded-xl bg-player1 px-6 font-semibold text-white"
-        >
-          Рестарт
-        </button>
+        <>
+          <button
+            type="button"
+            onClick={restart}
+            className="flex min-h-[48px] w-full items-center justify-center rounded-xl bg-player1 px-6 font-semibold text-white"
+          >
+            Рестарт
+          </button>
+          <button
+            type="button"
+            onClick={resetPlayers}
+            className="flex min-h-[48px] w-full items-center justify-center rounded-xl border border-wb-text-muted/30 bg-wb-surface px-6 font-semibold text-wb-text-muted"
+          >
+            Сбросить игроков
+          </button>
+        </>
       )}
 
       {/* Emergency reset confirmation dialog */}

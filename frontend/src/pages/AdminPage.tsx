@@ -14,6 +14,7 @@ export default function AdminPage() {
   const ws = useAdminStore((s) => s.ws)
   const phase = useAdminStore((s) => s.phase)
   const authError = useAdminStore((s) => s.authError)
+  const everJoined = useAdminStore((s) => s.everJoined)
   const { connect } = useAdminWebSocket()
 
   const handleLogin = () => {
@@ -27,9 +28,10 @@ export default function AdminPage() {
     connect(adminKey.trim())
   }
 
-  // Show login screen until WebSocket is connected and joined
-  // 'waiting' = initial state before login; 'connecting' = actively connecting after login click
-  if (!ws) {
+  // Show login screen only when we've never successfully joined.
+  // During transient reconnects (ws=null but everJoined=true) keep the
+  // admin UI visible so the login form doesn't flash on every reconnect.
+  if (!everJoined) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center bg-wb-bg px-4">
         <motion.div
@@ -82,6 +84,16 @@ export default function AdminPage() {
 
   return (
     <main className="flex min-h-screen flex-col bg-wb-bg">
+      {/* Reconnecting banner — ws dropped but session still valid */}
+      {!ws && (
+        <div className="flex items-center justify-center gap-2 bg-warning/15 px-4 py-2 text-sm text-warning">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+          </svg>
+          Переподключение...
+        </div>
+      )}
+
       {/* Main content area — pb-16 to clear fixed bottom tab bar */}
       <div className="flex-1 overflow-y-auto pb-16">
         <AnimatePresence mode="wait">
