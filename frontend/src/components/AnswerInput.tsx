@@ -45,41 +45,35 @@ export default function AnswerInput() {
   }, [remaining, myAnswer, submittedAnswer, phase, ws, currentRound, submitAnswerAction, setSubmittedAnswer])
 
   return (
-    <div className="flex flex-col items-center gap-3">
-      <div className="w-full max-w-md">
-        <input
-          type="number"
-          min={0}
-          max={1000000}
-          value={myAnswer ?? ''}
-          onChange={(e) => {
-            if (e.target.value === '') {
-              setMyAnswer(null)
-              return
-            }
-            const val = Number(e.target.value)
-            // Reject NaN and Infinity from intermediate typing states (e.g. '.', '-', 'e')
-            if (!Number.isFinite(val)) return
-            setMyAnswer(val)
-          }}
-          disabled={isDisabled}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') handleSubmit()
-          }}
-          className="w-full min-h-[56px] rounded-lg border border-wb-text-muted/30 bg-wb-bg px-4 text-center text-[36px] font-semibold leading-[1.2] text-wb-text placeholder:text-wb-text-muted focus:border-player1 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-          placeholder="0"
-        />
-        <p className="mt-2 text-center text-sm text-wb-text-muted">
-          Введите целое число от 0 до 1 000 000
-        </p>
-      </div>
+    <div className="flex flex-row items-stretch gap-2">
+      <input
+        type="number"
+        min={0}
+        max={1000000}
+        value={myAnswer ?? ''}
+        onChange={(e) => {
+          if (e.target.value === '') {
+            setMyAnswer(null)
+            return
+          }
+          const val = Number(e.target.value)
+          if (!Number.isFinite(val)) return
+          setMyAnswer(val)
+        }}
+        disabled={isDisabled}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') handleSubmit()
+        }}
+        className="flex-1 min-h-[52px] min-w-0 rounded-lg border border-wb-text-muted/30 bg-wb-bg px-4 text-center text-2xl font-semibold leading-[1.2] text-wb-text placeholder:text-wb-text-muted focus:border-player1 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+        placeholder="0"
+      />
       <button
         type="button"
         onClick={handleSubmit}
         disabled={isDisabled}
-        className="flex min-h-[56px] items-center justify-center rounded-lg bg-player1 px-6 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex min-h-[52px] shrink-0 items-center justify-center rounded-lg bg-player1 px-5 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {submittedAnswer ? 'Ответ принят' : 'Ответить'}
+        {submittedAnswer ? '✓' : 'Ответить'}
       </button>
     </div>
   )
