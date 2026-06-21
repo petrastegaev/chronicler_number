@@ -19,42 +19,48 @@ export default function GameScreen() {
   const { connect } = useWebSocket()
   const { keyboardOffset } = useViewportHeight()
 
-  // Mount sound effects hook -- starts preloading, subscribes to store
   useSoundEffects()
 
   const showHeader = ['playing', 'showing_result', 'finished'].includes(phase)
   const showInput = phase === 'playing'
 
   useEffect(() => {
-    if (!ws) {
-      connect()
-    }
+    if (!ws) connect()
   }, [ws, connect])
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-wb-bg">
+    <div className="flex h-dvh flex-col bg-wb-bg">
       {showHeader && <GameHeader />}
-      <AnimatePresence>
-        {phase === 'idle' || phase === 'joining' ? (
-          <JoinScreen key="join" />
-        ) : phase === 'waiting' ? (
-          <WaitingScreen key="waiting" />
-        ) : phase === 'playing' ? (
-          <PlayingScreen key="playing" />
-        ) : phase === 'showing_result' ? (
-          <ResultOverlay key="result" />
-        ) : phase === 'finished' ? (
-          <FinalScreen key="finished" />
-        ) : null}
-      </AnimatePresence>
+
+      {/* Scrollable body — iOS 26 workaround: scroll inside child, not body */}
+      <div className="flex flex-1 flex-col overflow-y-auto">
+        <AnimatePresence>
+          {phase === 'idle' || phase === 'joining' ? (
+            <JoinScreen key="join" />
+          ) : phase === 'waiting' ? (
+            <WaitingScreen key="waiting" />
+          ) : phase === 'playing' ? (
+            <PlayingScreen key="playing" />
+          ) : phase === 'showing_result' ? (
+            <ResultOverlay key="result" />
+          ) : phase === 'finished' ? (
+            <FinalScreen key="finished" />
+          ) : null}
+        </AnimatePresence>
+      </div>
+
       <ConnectionStatus />
 
-      {/* Input bar — fixed above the iOS virtual keyboard.
-          keyboardOffset = 0 on desktop, rises with the keyboard on iPad. */}
+      {/* Input bar — fixed at viewport bottom.  When the iOS keyboard opens,
+          translateY pushes it up exactly by the keyboard height.
+          Uses transform (GPU) instead of changing bottom (layout thrash). */}
       {showInput && (
         <div
-          className="fixed left-0 right-0 z-30 px-4 pb-4 bg-wb-bg"
-          style={{ bottom: keyboardOffset }}
+          className="fixed bottom-0 left-0 right-0 z-30 bg-wb-bg px-4 pb-4 pt-2"
+          style={{
+            transform: `translateY(-${keyboardOffset}px)`,
+            transition: 'transform 0.1s ease-out',
+          }}
         >
           <div className="mx-auto max-w-md">
             <AnswerInput />
