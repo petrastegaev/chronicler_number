@@ -19,6 +19,10 @@ export default function ResultOverlay() {
     playerNumber === 1 ? roundResult.player1_answer : roundResult.player2_answer
   const opponentAnswer =
     playerNumber === 1 ? roundResult.player2_answer : roundResult.player1_answer
+  const myQualifies =
+    playerNumber === 1 ? roundResult.p1_qualifies : roundResult.p2_qualifies
+  const opponentQualifies =
+    playerNumber === 1 ? roundResult.p2_qualifies : roundResult.p1_qualifies
 
   const winnerText = isWinner ? 'Вы выиграли раунд!' : isLoser ? 'Соперник выиграл раунд' : 'Ничья'
 
@@ -59,17 +63,30 @@ export default function ResultOverlay() {
           style={{ color: myAnswerColor }}
         >
           {'Ваш ответ: '}
-          {myAnswer !== null && myAnswer !== undefined ? myAnswer : '—'}
+          <span style={myAnswer !== null && myAnswer !== undefined && !myQualifies ? { textDecorationLine: 'line-through', textDecorationThickness: '2px' } : undefined}>
+            {myAnswer !== null && myAnswer !== undefined ? myAnswer : '—'}
+          </span>
+          {myAnswer !== null && myAnswer !== undefined && !myQualifies && (
+            <span className="ml-2 text-sm text-wb-text-muted">{'(не засчитан)'}</span>
+          )}
         </p>
 
         <p className="mt-2 text-xl font-semibold leading-[1.3] text-correct">
           {'Правильный ответ: '}
           {roundResult.correct_answer}
+          <span className="ml-2 text-sm font-normal text-wb-text-muted">
+            {'(±75%)'}
+          </span>
         </p>
 
         <p className="mt-2 text-xl font-semibold leading-[1.3] text-wb-text">
           {'Ответ соперника: '}
-          {opponentAnswer !== null && opponentAnswer !== undefined ? opponentAnswer : '—'}
+          <span style={opponentAnswer !== null && opponentAnswer !== undefined && !opponentQualifies ? { textDecorationLine: 'line-through', textDecorationThickness: '2px' } : undefined}>
+            {opponentAnswer !== null && opponentAnswer !== undefined ? opponentAnswer : '—'}
+          </span>
+          {opponentAnswer !== null && opponentAnswer !== undefined && !opponentQualifies && (
+            <span className="ml-2 text-sm text-wb-text-muted">{'(не засчитан)'}</span>
+          )}
         </p>
       </motion.div>
     </motion.div>

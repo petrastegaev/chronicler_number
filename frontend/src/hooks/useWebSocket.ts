@@ -94,6 +94,8 @@ export function useWebSocket() {
           player1_answer: number | null
           player2_answer: number | null
           winner: 'player1' | 'player2' | 'draw'
+          p1_qualifies: boolean
+          p2_qualifies: boolean
         }
         store.setRoundResultData(data)
         break

@@ -127,8 +127,27 @@ class GameSession:
         elif player_num == 2 and self.p2_answer is None:
             self.p2_answer = answer
 
+    ACCURACY_THRESHOLD = 0.75  # 75% relative error allowed
+
+    @staticmethod
+    def _qualifies(answer: int | None, correct: int) -> bool:
+        """An answer qualifies for scoring if it is within 75% of the correct answer.
+
+        Correct == 0 is a degenerate case — use an absolute ±1 threshold instead.
+        """
+        if answer is None:
+            return False
+        if correct == 0:
+            return answer in (0, 1)
+        deviation = abs(answer - correct) / correct
+        return deviation <= GameSession.ACCURACY_THRESHOLD
+
     def _compute_round_result(self, question) -> dict:
-        """Compute winner by absolute difference proximity scoring."""
+        """Compute round winner by closest qualifying answer.
+
+        An answer counts only when it falls within 75% of the correct value.
+        If both answers are out-of-range (or missing), the round is a draw.
+        """
         correct = question.answer
 
         def diff(answer):
@@ -136,12 +155,21 @@ class GameSession:
                 return float("inf")
             return abs(answer - correct)
 
-        d1 = diff(self.p1_answer)
-        d2 = diff(self.p2_answer)
+        p1_qualifies = self._qualifies(self.p1_answer, correct)
+        p2_qualifies = self._qualifies(self.p2_answer, correct)
 
-        if d1 < d2:
+        if p1_qualifies and p2_qualifies:
+            d1 = diff(self.p1_answer)
+            d2 = diff(self.p2_answer)
+            if d1 < d2:
+                winner = "player1"
+            elif d2 < d1:
+                winner = "player2"
+            else:
+                winner = "draw"
+        elif p1_qualifies:
             winner = "player1"
-        elif d2 < d1:
+        elif p2_qualifies:
             winner = "player2"
         else:
             winner = "draw"
@@ -152,6 +180,8 @@ class GameSession:
             "player1_answer": self.p1_answer if self.p1_answer is not None else None,
             "player2_answer": self.p2_answer if self.p2_answer is not None else None,
             "winner": winner,
+            "p1_qualifies": p1_qualifies,
+            "p2_qualifies": p2_qualifies,
         }
 
     async def _finish_game(self):

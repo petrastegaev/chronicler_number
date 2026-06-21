@@ -7,17 +7,18 @@ export default function FinalScreen() {
 
   if (phase !== 'finished') return null
 
-  const winnerNickname = gameEndResult?.winner
-    ? (gameEndResult.winner === 'player1' ? gameEndResult.player1_nickname : gameEndResult.player2_nickname)
-    : null
+  // Backend sends the actual winner nickname (or null for draw), not "player1"/"player2" role labels.
+  const winnerNickname = gameEndResult?.winner ?? null
+  const isDraw = winnerNickname === null
 
-  const winnerColor = gameEndResult?.winner === 'player1'
+  const winnerIsP1 = winnerNickname !== null && winnerNickname === gameEndResult?.player1_nickname
+  const winnerIsP2 = winnerNickname !== null && winnerNickname === gameEndResult?.player2_nickname
+
+  const winnerColor = winnerIsP1
     ? 'var(--color-player1)'
-    : gameEndResult?.winner === 'player2'
+    : winnerIsP2
       ? 'var(--color-player2)'
       : 'var(--color-wb-text)'
-
-  const isDraw = !gameEndResult?.winner
 
   return (
     <motion.div

@@ -6,6 +6,8 @@ services:
       - "8081:8000"
     volumes:
       - data:/app/data
+    environment:
+      - ADMIN_KEY=booth2026
     command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 volumes:
