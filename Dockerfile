@@ -22,6 +22,12 @@ RUN adduser --disabled-password --gecos '' appuser
 # Create data directory for SQLite at /app/data (matches compose volume mount)
 RUN mkdir -p /app/data && chown appuser /app/data
 
+# Make the copied static tree readable by the non-root appuser.
+# COPY can land .otf fonts as mode 0600 (root-only), causing StaticFiles to send
+# a Content-Length header but 0 body bytes -> browser ERR_CONTENT_LENGTH_MISMATCH.
+# a+rX grants read to all + traverse on directories only (not exec on files).
+RUN chmod -R a+rX ./static
+
 USER appuser
 
 EXPOSE 8000
