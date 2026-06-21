@@ -28,7 +28,7 @@ export default function GameScreen() {
   }, [ws, connect])
 
   return (
-    <div className="relative h-dvh bg-wb-bg overflow-hidden">
+    <div className="relative flex h-dvh flex-col bg-wb-bg overflow-hidden">
       {showHeader && <GameHeader />}
       <AnimatePresence>
         {phase === 'idle' || phase === 'joining' ? (

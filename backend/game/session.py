@@ -26,6 +26,7 @@ class GameSession:
         self._remaining: int = 10
         self.answer_deadline: float = 0.0
         self.start_event = asyncio.Event()
+        self.both_answered = asyncio.Event()
 
     async def run(self, questions: list):
         """Main game loop. Launched via asyncio.create_task()."""
@@ -56,9 +57,14 @@ class GameSession:
         await self._finish_game()
 
     async def _run_round(self, question):
-        """Execute a single round: present question, tick timer, show result."""
+        """Execute a single round: present question, tick timer, show result.
+
+        The round ends when the timer reaches 0 OR both players submit an answer
+        (whichever happens first).
+        """
         self.p1_answer = None
         self.p2_answer = None
+        self.both_answered.clear()
         self.state = "presenting_question"
 
         # Broadcast round_started to all
@@ -73,15 +79,24 @@ class GameSession:
         self.state = "accepting_answers"
         self.answer_deadline = time.monotonic() + 10.0 + 0.05
 
-        # Timer: 10 seconds, tick every 1 second (11 ticks: 10 down to 0)
+        # Timer: 10 seconds, tick every 1 second (11 ticks: 10 down to 0).
+        # If both players answer before the second elapses, skip the remaining
+        # ticks and jump straight to the result.
         for remaining in range(10, -1, -1):
             await self.manager.broadcast({
                 "event": "timer_tick",
                 "data": {"remaining": remaining}
             })
             self._remaining = remaining
-            if remaining > 0:
-                await asyncio.sleep(1)
+            if remaining == 0:
+                break
+            # Wait 1 second or until both players have submitted their answers
+            try:
+                await asyncio.wait_for(self.both_answered.wait(), timeout=1.0)
+                # Both answered — skip remaining timer ticks
+                break
+            except asyncio.TimeoutError:
+                pass  # 1 second elapsed, next tick
 
         # Fairness window: allow in-flight submit_answer calls to be processed
         await asyncio.sleep(0.05)
@@ -117,7 +132,10 @@ class GameSession:
         await asyncio.sleep(3)
 
     def submit_answer(self, player_num: int, answer: int):
-        """Called from the WebSocket event dispatcher. First answer per player wins."""
+        """Called from the WebSocket event dispatcher. First answer per player wins.
+
+        When both players have answered, signals the timer to end the round early.
+        """
         if self.state != "accepting_answers":
             return  # Round not active
         if time.monotonic() > self.answer_deadline:
@@ -126,6 +144,12 @@ class GameSession:
             self.p1_answer = answer
         elif player_num == 2 and self.p2_answer is None:
             self.p2_answer = answer
+        else:
+            return  # Duplicate or invalid — nothing changed
+
+        # If both players have now answered, signal the timer to skip ahead
+        if self.p1_answer is not None and self.p2_answer is not None:
+            self.both_answered.set()
 
     ACCURACY_THRESHOLD = 0.75  # 75% relative error allowed
 

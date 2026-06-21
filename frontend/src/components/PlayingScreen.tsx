@@ -8,7 +8,7 @@ export default function PlayingScreen() {
 
   return (
     <motion.div
-      className="flex h-dvh flex-col bg-wb-bg pt-10"
+      className="flex flex-1 flex-col bg-wb-bg pt-10 min-h-0"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
