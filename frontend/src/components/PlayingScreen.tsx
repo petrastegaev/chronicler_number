@@ -1,6 +1,5 @@
 import { motion } from 'motion/react'
 import { useGameStore } from '../stores/gameStore'
-import AnswerInput from './AnswerInput'
 import TimerRing from './TimerRing'
 
 export default function PlayingScreen() {
@@ -22,12 +21,8 @@ export default function PlayingScreen() {
         </p>
       </div>
 
-      {/* Input — pinned to bottom, above keyboard */}
-      <div className="flex-none px-4 pb-4">
-        <div className="mx-auto max-w-md">
-          <AnswerInput />
-        </div>
-      </div>
+      {/* Spacer so content doesn't hide behind the fixed input bar */}
+      <div className="h-[68px] flex-none" />
     </motion.div>
   )
 }

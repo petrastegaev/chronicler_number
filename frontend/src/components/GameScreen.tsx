@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence } from 'motion/react'
 import { useGameStore } from '../stores/gameStore'
 import { useWebSocket } from '../hooks/useWebSocket'
 import { useSoundEffects } from '../audio/useSoundEffects'
@@ -11,17 +11,19 @@ import GameHeader from './GameHeader'
 import ResultOverlay from './ResultOverlay'
 import FinalScreen from './FinalScreen'
 import ConnectionStatus from './ConnectionStatus'
+import AnswerInput from './AnswerInput'
 
 export default function GameScreen() {
   const phase = useGameStore((s) => s.phase)
   const ws = useGameStore((s) => s.ws)
   const { connect } = useWebSocket()
-  const { height: viewHeight } = useViewportHeight()
+  const { keyboardOffset } = useViewportHeight()
 
   // Mount sound effects hook -- starts preloading, subscribes to store
   useSoundEffects()
 
   const showHeader = ['playing', 'showing_result', 'finished'].includes(phase)
+  const showInput = phase === 'playing'
 
   useEffect(() => {
     if (!ws) {
@@ -30,10 +32,7 @@ export default function GameScreen() {
   }, [ws, connect])
 
   return (
-    <div
-      className="relative flex flex-col bg-wb-bg"
-      style={{ height: viewHeight }}
-    >
+    <div className="relative flex min-h-screen flex-col bg-wb-bg">
       {showHeader && <GameHeader />}
       <AnimatePresence>
         {phase === 'idle' || phase === 'joining' ? (
@@ -49,6 +48,19 @@ export default function GameScreen() {
         ) : null}
       </AnimatePresence>
       <ConnectionStatus />
+
+      {/* Input bar — fixed above the iOS virtual keyboard.
+          keyboardOffset = 0 on desktop, rises with the keyboard on iPad. */}
+      {showInput && (
+        <div
+          className="fixed left-0 right-0 z-30 px-4 pb-4 bg-wb-bg"
+          style={{ bottom: keyboardOffset }}
+        >
+          <div className="mx-auto max-w-md">
+            <AnswerInput />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
