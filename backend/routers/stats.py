@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth import verify_admin_key
 from database import get_db
-from models import Stat
-from schemas import LeaderboardEntry, LeaderboardResponse, StatsResponse
+from models import GameSession, Stat
+from schemas import LeaderboardEntry, LeaderboardResponse, RecentGameEntry, RecentGamesResponse, StatsResponse
 
 router = APIRouter(prefix="/api/stats", tags=["stats"])
 
@@ -71,3 +71,33 @@ async def get_leaderboard(
     ]
 
     return LeaderboardResponse(entries=entries)
+
+
+@router.get("/recent-games", response_model=RecentGamesResponse)
+async def get_recent_games(
+    limit: int = Query(10, ge=1, le=50),
+    db: AsyncSession = Depends(get_db),
+    _: bool = Depends(verify_admin_key),
+):
+    """Return the most recent games ordered by end time."""
+    result = await db.execute(
+        select(GameSession)
+        .where(GameSession.ended_at.isnot(None))
+        .order_by(GameSession.ended_at.desc())
+        .limit(limit)
+    )
+    games = result.scalars().all()
+    return RecentGamesResponse(
+        games=[
+            RecentGameEntry(
+                id=g.id,
+                player1_nickname=g.player1_nickname,
+                player2_nickname=g.player2_nickname,
+                player1_score=g.player1_score,
+                player2_score=g.player2_score,
+                winner_nickname=g.winner_nickname,
+                ended_at=g.ended_at,
+            )
+            for g in games
+        ]
+    )

@@ -53,9 +53,9 @@ export function useWebSocket() {
           player2_nickname?: string | null
           token?: string
         }
-        // Save reconnect token so page refresh recovers the session
+        // Save reconnect token in sessionStorage to prevent cross-tab leakage (BUG-CROSS-TAB-TOKEN)
         if (data.token) {
-          try { localStorage.setItem('ws_reconnect_token_player', data.token) } catch {}
+          try { sessionStorage.setItem('ws_reconnect_token_player', data.token) } catch {}
         }
         store.setPlayerNumber(data.player_number ?? null)
         const opponentNick =
@@ -155,6 +155,10 @@ export function useWebSocket() {
         if (msg.event === 'error') {
           const errorData = msg.data as { message?: string }
           console.error('[WS] Server error:', errorData.message ?? 'Unknown error')
+          // Clear stale reconnect token to break infinite reconnect loop (BUG-STALE-TOKEN-LOOP)
+          if (errorData.message?.includes('Недействительный токен')) {
+            try { sessionStorage.removeItem('ws_reconnect_token_player') } catch {}
+          }
           store.setPhase('idle')
         }
         break
@@ -198,8 +202,8 @@ export function useWebSocket() {
 
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
     const host = window.location.host
-    // Restore reconnect token from localStorage for seamless session recovery
-    const savedToken = (() => { try { return localStorage.getItem('ws_reconnect_token_player') } catch { return null } })()
+    // Restore reconnect token from sessionStorage (per-tab) for seamless session recovery (BUG-CROSS-TAB-TOKEN)
+    const savedToken = (() => { try { return sessionStorage.getItem('ws_reconnect_token_player') } catch { return null } })()
     const tokenParam = savedToken ? `?token=${savedToken}` : ''
     const ws = new WebSocket(`${protocol}//${host}/ws${tokenParam}`)
     wsRef.current = ws

@@ -12,10 +12,19 @@ MAX_ROWS = 5000
 
 class QuestionService:
     @staticmethod
-    async def get_all(db: AsyncSession, skip: int = 0, limit: int = 50):
-        result = await db.execute(
-            select(Question).order_by(Question.id).offset(skip).limit(limit)
-        )
+    async def get_all(
+        db: AsyncSession,
+        offset: int = 0,
+        limit: int = 50,
+        category: str | None = None,
+        text: str | None = None,
+    ):
+        query = select(Question).order_by(Question.id)
+        if category:
+            query = query.where(Question.category == category)
+        if text:
+            query = query.where(Question.text.ilike(f"%{text}%"))
+        result = await db.execute(query.offset(offset).limit(limit))
         return result.scalars().all()
 
     @staticmethod

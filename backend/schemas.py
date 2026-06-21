@@ -26,6 +26,20 @@ class CsvImportResponse(BaseModel):
     errors: list[str]
 
 
+class RecentGameEntry(BaseModel):
+    id: int
+    player1_nickname: str
+    player2_nickname: str
+    player1_score: int
+    player2_score: int
+    winner_nickname: str | None
+    ended_at: datetime | None
+
+
+class RecentGamesResponse(BaseModel):
+    games: list[RecentGameEntry]
+
+
 class QuestionCreate(BaseModel):
     text: str = Field(..., min_length=1, max_length=500)
     answer: int = Field(..., ge=0, le=1_000_000)

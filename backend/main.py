@@ -311,7 +311,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     if player_num == 2 and manager.player1 is not None:
                         await manager.send_to_player(1, {
                             "event": "player_joined",
-                            "data": {"player2_nickname": nickname}
+                            "data": {"player_number": 2, "player2_nickname": nickname}
                         })
                 else:
                     # Unknown role -- reject and close so the socket never hangs (BUG-UNKNOWN-ROLE)

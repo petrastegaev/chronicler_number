@@ -14,12 +14,16 @@ router = APIRouter(prefix="/api/questions", tags=["questions"])
 
 @router.get("/")
 async def list_questions(
-    skip: int = 0,
+    offset: int = 0,
     limit: int = 50,
+    category: str | None = None,
+    text: str | None = None,
     db: AsyncSession = Depends(get_db),
     _: bool = Depends(verify_admin_key),
 ):
-    questions = await QuestionService.get_all(db, skip=skip, limit=limit)
+    questions = await QuestionService.get_all(
+        db, offset=offset, limit=limit, category=category, text=text
+    )
     total = (await db.execute(select(func.count(Question.id)))).scalar_one()
     return {"items": questions, "total": total}
 
