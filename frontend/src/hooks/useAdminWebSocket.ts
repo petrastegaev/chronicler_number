@@ -76,9 +76,10 @@ export function useAdminWebSocket() {
         break
       }
       case 'round_started': {
-        const data = msg.data as { round_number: number; total_rounds: number }
+        const data = msg.data as { round_number: number; total_rounds: number; question_text: string }
         store.setCurrentRound(data.round_number)
         store.setTotalRounds(data.total_rounds)
+        store.setQuestionText(data.question_text)
         break
       }
       case 'timer_tick': {

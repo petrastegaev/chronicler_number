@@ -20,6 +20,7 @@ export default function GameControlTab() {
   const player2Score = useAdminStore((s) => s.player2Score)
   const currentRound = useAdminStore((s) => s.currentRound)
   const totalRounds = useAdminStore((s) => s.totalRounds)
+  const questionText = useAdminStore((s) => s.questionText)
   const totalQuestions = useAdminStore((s) => s.totalQuestions)
   const setTotalQuestions = useAdminStore((s) => s.setTotalQuestions)
 
@@ -98,6 +99,11 @@ export default function GameControlTab() {
           <span className="text-sm font-semibold text-wb-text-muted">
             Раунд {currentRound} / {totalRounds}
           </span>
+          {phase === 'playing' && questionText && (
+            <p className="mt-2 max-w-full rounded-lg bg-wb-surface px-4 py-3 text-center text-sm font-semibold leading-[1.3] text-wb-text">
+              {questionText}
+            </p>
+          )}
         </div>
       )}
 

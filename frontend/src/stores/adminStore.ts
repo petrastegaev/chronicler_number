@@ -18,6 +18,7 @@ interface AdminState {
   player2Score: number
   currentRound: number
   totalRounds: number
+  questionText: string
   ws: WebSocket | null
   gameCount: number
   questions: Question[]
@@ -39,6 +40,7 @@ interface AdminActions {
   setPlayer2Score: (score: number) => void
   setCurrentRound: (round: number) => void
   setTotalRounds: (rounds: number) => void
+  setQuestionText: (text: string) => void
   setWs: (ws: WebSocket | null) => void
   setGameCount: (count: number) => void
   setQuestions: (questions: Question[]) => void
@@ -68,6 +70,7 @@ const initialState: AdminState = {
   player2Score: 0,
   currentRound: 0,
   totalRounds: 9,
+  questionText: '',
   ws: null,
   gameCount: 0,
   questions: [],
@@ -92,6 +95,7 @@ export const useAdminStore = create<AdminStore>((set) => ({
   setPlayer2Score: (score) => set({ player2Score: score }),
   setCurrentRound: (round) => set({ currentRound: round }),
   setTotalRounds: (rounds) => set({ totalRounds: rounds }),
+  setQuestionText: (text) => set({ questionText: text }),
   setWs: (ws) => set({ ws }),
   setGameCount: (count) => set({ gameCount: count }),
   setQuestions: (questions) => set({ questions }),
