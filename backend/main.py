@@ -393,18 +393,21 @@ async def websocket_endpoint(websocket: WebSocket):
                 elif event == "restart":
                     await reset_game()
                 elif event == "reset_players":
-                    # Close player connections and clear their slots.
-                    # Players receive players_reset → phase='idle' → join screen.
-                    #
-                    # IMPORTANT: send to BOTH players first, then close them.
-                    # Closing one player mid-loop can trigger WebSocketDisconnect
-                    # handler which races with our cleanup of the other slot.
+                    # Cancel any running game FIRST so in-flight timer ticks
+                    # stop before we close player connections.
+                    if game_task is not None and not game_task.done():
+                        game_task.cancel()
+                        try:
+                            await game_task
+                        except asyncio.CancelledError:
+                            pass
+                        game_task = None
+                    active_session = None
 
+                    # Notify players and close their connections.
                     p1_ws = manager.player1
                     p2_ws = manager.player2
 
-                    # Phase 1: notify both players (best-effort, with timeout
-                    # to avoid hanging if a client's receive buffer is full)
                     for player_ws in (p1_ws, p2_ws):
                         if player_ws:
                             try:
@@ -418,7 +421,6 @@ async def websocket_endpoint(websocket: WebSocket):
                             except Exception:
                                 pass
 
-                    # Phase 2: close both connections
                     for player_ws in (p1_ws, p2_ws):
                         if player_ws:
                             try:
@@ -430,16 +432,6 @@ async def websocket_endpoint(websocket: WebSocket):
                     manager.player2 = None
                     manager.player1_nickname = None
                     manager.player2_nickname = None
-
-                    # Cancel any running game
-                    if game_task is not None and not game_task.done():
-                        game_task.cancel()
-                        try:
-                            await game_task
-                        except asyncio.CancelledError:
-                            pass
-                        game_task = None
-                    active_session = None
 
                     await websocket.send_json({
                         "event": "players_reset",
