@@ -23,7 +23,11 @@ export default function AdminPage() {
       return
     }
     setKeyError('')
-    useAdminStore.getState().setAuthError(null) // Clear previous auth errors
+    // Clear stale reconnect token so the first attempt always goes through
+    // the normal join flow — a token from a previous session is invalid
+    // after server restart (tokens are in-memory only).
+    try { sessionStorage.removeItem('ws_reconnect_token_admin') } catch {}
+    useAdminStore.getState().setAuthError(null)
     useAdminStore.getState().setAdminKey(adminKey.trim())
     connect(adminKey.trim())
   }
