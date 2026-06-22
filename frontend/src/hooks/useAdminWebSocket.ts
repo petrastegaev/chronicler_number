@@ -5,7 +5,7 @@ import type { WsMessage } from '../types/ws'
 const MAX_RECONNECT_DELAY = 10000
 const BASE_RECONNECT_DELAY = 1000
 const HEARTBEAT_INTERVAL = 15000
-const HEARTBEAT_TIMEOUT = 60000
+const HEARTBEAT_TIMEOUT = 120000  // 2 min safety net; protocol-level ws-ping handles keep-alive
 
 function isWsMessage(raw: unknown): raw is WsMessage {
   return (
