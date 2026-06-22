@@ -108,6 +108,7 @@ export const useAdminStore = create<AdminStore>((set) => ({
 
   resetPlayers: () =>
     set({
+      phase: 'lobby',
       player1Nickname: '',
       player2Nickname: '',
       player1Online: false,

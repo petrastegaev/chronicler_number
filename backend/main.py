@@ -395,16 +395,37 @@ async def websocket_endpoint(websocket: WebSocket):
                 elif event == "reset_players":
                     # Close player connections and clear their slots.
                     # Players receive players_reset → phase='idle' → join screen.
-                    for player_ws in (manager.player1, manager.player2):
+                    #
+                    # IMPORTANT: send to BOTH players first, then close them.
+                    # Closing one player mid-loop can trigger WebSocketDisconnect
+                    # handler which races with our cleanup of the other slot.
+
+                    p1_ws = manager.player1
+                    p2_ws = manager.player2
+
+                    # Phase 1: notify both players (best-effort, with timeout
+                    # to avoid hanging if a client's receive buffer is full)
+                    for player_ws in (p1_ws, p2_ws):
                         if player_ws:
                             try:
-                                await player_ws.send_json({
-                                    "event": "players_reset",
-                                    "data": {"message": "Администратор сбросил игроков"}
-                                })
+                                await asyncio.wait_for(
+                                    player_ws.send_json({
+                                        "event": "players_reset",
+                                        "data": {"message": "Администратор сбросил игроков"}
+                                    }),
+                                    timeout=3.0,
+                                )
+                            except Exception:
+                                pass
+
+                    # Phase 2: close both connections
+                    for player_ws in (p1_ws, p2_ws):
+                        if player_ws:
+                            try:
                                 await player_ws.close()
                             except Exception:
                                 pass
+
                     manager.player1 = None
                     manager.player2 = None
                     manager.player1_nickname = None
