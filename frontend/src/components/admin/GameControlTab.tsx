@@ -161,13 +161,22 @@ export default function GameControlTab() {
         </>
       )}
       {phase === 'playing' && (
-        <button
-          type="button"
-          onClick={() => setShowResetConfirm(true)}
-          className="flex min-h-[48px] w-full items-center justify-center rounded-xl bg-danger px-6 font-semibold text-white"
-        >
-          Сбросить игру
-        </button>
+        <>
+          <button
+            type="button"
+            onClick={() => setShowResetConfirm(true)}
+            className="flex min-h-[48px] w-full items-center justify-center rounded-xl bg-danger px-6 font-semibold text-white"
+          >
+            Сбросить игру
+          </button>
+          <button
+            type="button"
+            onClick={resetPlayers}
+            className="flex min-h-[48px] w-full items-center justify-center rounded-xl border border-wb-text-muted/30 bg-wb-surface px-6 font-semibold text-wb-text-muted"
+          >
+            Сбросить игроков
+          </button>
+        </>
       )}
       {phase === 'finished' && (
         <>
