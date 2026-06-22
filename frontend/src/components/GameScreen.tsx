@@ -29,7 +29,7 @@ export default function GameScreen() {
   }, [ws, connect])
 
   return (
-    <div className="flex h-dvh flex-col bg-wb-bg">
+    <div className="flex h-dvh flex-col bg-wb-bg overflow-hidden">
       {showHeader && <GameHeader />}
 
       {/* Scrollable body — iOS 26 workaround: scroll inside child, not body */}

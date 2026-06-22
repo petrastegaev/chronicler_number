@@ -39,10 +39,5 @@
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* iOS 26 workaround: prevent body scroll, force scroll inside child.
-       Without this, visualViewport.offsetTop misreports when keyboard
-       opens in Safari 26 "Compact"/"Bottom" tab layout. */
-    overflow: hidden;
-    height: 100dvh;
   }
 }
