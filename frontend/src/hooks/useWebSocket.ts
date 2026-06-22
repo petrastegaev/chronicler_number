@@ -128,7 +128,11 @@ export function useWebSocket() {
         break
       }
       case 'players_reset': {
-        // Admin cleared the player slots — go back to join screen, don't reconnect
+        // Admin cleared the player slots — go back to join screen.
+        // Clear reconnect token so the automatic reconnect (triggered by
+        // server closing the WS) starts a fresh session, not a restore
+        // of the just-cleared slot.
+        try { sessionStorage.removeItem('ws_reconnect_token_player') } catch {}
         store.reset()
         store.setPhase('idle')
         break

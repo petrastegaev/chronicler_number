@@ -404,12 +404,16 @@ async def websocket_endpoint(websocket: WebSocket):
                         game_task = None
                     active_session = None
 
-                    # Notify players and close their connections.
-                    p1_ws = manager.player1
-                    p2_ws = manager.player2
+                    # Notify players, revoke their reconnect tokens, and close.
+                    from game.tokens import remove_token
 
-                    for player_ws in (p1_ws, p2_ws):
+                    for player_ws in (manager.player1, manager.player2):
                         if player_ws:
+                            # Revoke the reconnect token so the player can't
+                            # auto-reconnect into the just-cleared slot.
+                            token = getattr(player_ws, '_reconnect_token', None)
+                            if token:
+                                remove_token(token)
                             try:
                                 await asyncio.wait_for(
                                     player_ws.send_json({
@@ -421,7 +425,7 @@ async def websocket_endpoint(websocket: WebSocket):
                             except Exception:
                                 pass
 
-                    for player_ws in (p1_ws, p2_ws):
+                    for player_ws in (manager.player1, manager.player2):
                         if player_ws:
                             try:
                                 await player_ws.close()
